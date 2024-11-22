@@ -1,0 +1,31 @@
+{
+  "name": "chiaro-seed",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "gen": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "intro": "drizzle-kit introspect",
+    "seedd": "node --env-file=.env --watch -r ts-node/register src/index.ts",
+    "seed": "node --env-file=.env -r ts-node/register src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@faker-js/faker": "^9.2.0",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.9.1",
+    "drizzle-kit": "^0.28.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "-": "^0.0.1",
+    "better-sqlite3": "^11.5.0",
+    "drizzle-orm": "^0.36.3"
+  }
+}
