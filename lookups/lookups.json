@@ -1,0 +1,153 @@
+{
+  "WellType": [
+    {
+      "id": "oil",
+      "name": "Oil",
+      "icon": "oil-well"
+    },
+    {
+      "id": "gas",
+      "name": "Gas",
+      "icon": "oil-temperature"
+    },
+    {
+      "id": "water",
+      "name": "Water",
+      "icon": "water-arrow-down"
+    }
+  ],
+  "ActiveState": [
+    {
+      "id": "on",
+      "value": true,
+      "icon": "person-running-fast",
+      "name": "Active"
+    },
+    {
+      "id": "off",
+      "value": false,
+      "icon": "gauge-circle-minus",
+      "name": "Inactive"
+    }
+  ],
+  "Jurisdiction": [
+    {
+      "id": "ca.ab",
+      "name": "Canada / Alberta"
+    },
+    {
+      "id": "ca.sk",
+      "name": "Canada / Saskatchewan"
+    },
+    {
+      "id": "ca.bc",
+      "name": "Canada / Brit. Columbia"
+    },
+    {
+      "id": "ca.on",
+      "name": "Canada / Ontario"
+    }
+  ],
+  "Trajectory": [
+    {
+      "id": "vertical",
+      "name": "Vertical"
+    },
+    {
+      "id": "horizontal",
+      "name": "Horizontal"
+    },
+    {
+      "id": "deviated",
+      "name": "Deviated"
+    }
+  ],
+  "Survey": [
+    {
+      "id": "dls",
+      "name": "DLS (Dominion Land)"
+    },
+    {
+      "id": "nts",
+      "name": "NTS (National Topographic)"
+    }
+  ],
+  "LeaseType": [
+    {
+      "id": "oper",
+      "name": "Operating Lease"
+    },
+    {
+      "id": "finance",
+      "name": "Finance Lease"
+    },
+    {
+      "id": "agri",
+      "name": "Agriculture"
+    }
+  ],
+  "SiteAccess": [
+    {
+      "id": "all",
+      "name": "All season"
+    },
+    {
+      "id": "limited",
+      "name": "Seasonal (winter only)"
+    }
+  ],
+  "LandOwner": [
+    {
+      "id": "private",
+      "name": "Private"
+    },
+    {
+      "id": "crown",
+      "name": "Crown"
+    }
+  ],
+  "Lithology": [
+    {
+      "id": "sand",
+      "name": "Sandstone"
+    },
+    {
+      "id": "dolomite",
+      "name": "Dolostone"
+    },
+    {
+      "id": "lime",
+      "name": "Limestone"
+    },
+    {
+      "id": "clay",
+      "name": "Claystone"
+    }
+  ],
+  "Project": [
+    {
+      "id": "afe",
+      "name": "AFE"
+    },
+    {
+      "id": "construction",
+      "name": "Construction"
+    },
+    {
+      "id": "drilling",
+      "name": "Drilling"
+    },
+    {
+      "id": "completion",
+      "name": "Completion"
+    },
+    {
+      "id": "suspension",
+      "name": "Suspension"
+    },
+    {
+      "id": "abandonment",
+      "name": "Abandonment"
+    }
+  ]
+}

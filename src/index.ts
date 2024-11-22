@@ -1,5 +1,5 @@
 
-import { getUsers } from "./common";
+import { getUsers, getCompanies, getWells } from "./mock";
 import * as northern from "./schema/northern";
 import * as western from "./schema/western";
 import { getConnection } from './db_client';
@@ -12,10 +12,13 @@ seed();
 //process.env.TEST_VALUE
 async function seed(): Promise<void> {
     const t0 = Date.now();
-    const users = getUsers(co, 30);
+
+    const companies = getCompanies(200),
+        users = getUsers(co, 32),
+        [wells, wellbores] = getWells(10000)
 
     console.log('generating data:', Date.now() - t0);
-    
+
     //const db = getConnection("common");
 }
 

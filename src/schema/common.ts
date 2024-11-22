@@ -36,9 +36,10 @@ export const wellBore = sqliteTable("wells", {
       .references(() => well.id, { onDelete: "cascade" }),
     name: text("name").unique().notNull(),
     es: text("name"),
+    trajectory: text("trajectory"),
     location: text("location"),
     depth: real("depth"),
-    active: integer("active", { mode: "boolean" })
+    active: integer("active", { mode: "boolean" }),
   }),
   well = sqliteTable("wells", {
     id: text("id").primaryKey(),
