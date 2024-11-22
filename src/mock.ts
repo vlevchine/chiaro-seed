@@ -199,6 +199,68 @@ export function getWells(num = 0) {
   return [items, wellbores];
 }
 
+function projSets() {
+  return [
+    [0, 1, 2],
+    [0, 1, 2, 3],
+    [2, 3],
+    [2, 3, 4],
+    [0, 2],
+    [1, 2, 4],
+  ];
+}
+const Project = [
+    "afe",
+    "construction",
+    "drilling",
+    "completion",
+    "suspension",
+    "abandonment",
+  ],
+  nonActive = ["suspension", "abandonment"],
+  timed: any = {
+    afe: ["past", 1],
+    construction: ["past", 1],
+    drilling: [""],
+    completion: ["future", 2],
+    abandonment: ["future", 5],
+  },
+  dateFunc = {
+    past: faker.date.past,
+    future: faker.date.future,
+  };
+function generateProjects(wells: any[]) {
+  const projects = wells.reduce((acc, w, i) => {
+    let spud = w.spudDate;
+    const set = projSets()[faker.number.int({ min: 0, max: 5 })].map(
+        (e) => Project[e]
+      ),
+      items = set.map((type, i) => {
+        const [dir, years]: [string, number] = timed[type],
+          func: any =
+            dir === "past"
+              ? faker.date.past
+              : dir === "future"
+              ? faker.date.future
+              : undefined,
+          startDate = func?.({ years, refDate: spud }) ?? spud,
+          endDate = faker.date.soon({ days: 90, refDate: spud }),
+          proj = {
+            id: nanoid(10),
+            wellId: w.id,
+            type,
+            startDate,
+            endDate,
+          };
+        return proj;
+      });
+    acc.push(...items);
+    return acc;
+  }, []);
+
+  return projects;
+}
+
 function readLookups(name: string) {
   //!!! To update lookups per app.yaml / lookups object
   //use https://onlineyamltools.com/convert-yaml-to-json
