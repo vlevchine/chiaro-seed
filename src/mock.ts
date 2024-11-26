@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker";
-import fs from "fs";
 import { nanoid } from "nanoid";
 
 const specialRoles = ["power", "partner", "audit"],
@@ -12,40 +11,57 @@ const specialRoles = ["power", "partner", "audit"],
     "field",
   ];
 
-export function getCompanies(num = 0) {
-  const items: any[] = Array.from({ length: num }).map(() => ({
+let co: string, conf: any, lLookups: any;
+export const generate: any = {
+    vendor: getVendors,
+    company: getCompanies,
+    user: getUsers,
+    well: getWells,
+    wellBore: getWellbores,
+    project: getProjects,
+  },
+  init = (_co: string, _conf: any, _lLookups: any) => {
+    co = _co;
+    conf = _conf;
+    lLookups = _lLookups;
+  };
+
+export function getVendors(num = 0) {
+  return Array.from({ length: num }).map(() => ({
     id: nanoid(10),
     name: faker.company.name(),
-    timezone: "America/Toronto",
-    vendor: true,
+    type: "muds",
+    muds: true,
   }));
-  items.push({
-    engineering: true,
-    id: "engineering",
-    name: "engineering Service Co.",
-    locale: "en-CA",
-    timezone: "America/Winnipeg",
-  });
-  items.push({
-    partner: true,
-    id: "partner",
-    name: "My Patner Inc.",
-    locale: "en-US",
-    timezone: "America/Toronto",
-  });
-  items.push({
-    auditor: true,
-    id: "auditor",
-    name: "Auditing Authrity Co.",
-    locale: "en-GB",
-    timezone: "Europe/London",
-  });
-
-  return items;
+}
+export function getCompanies() {
+  return [
+    {
+      type: "engineering",
+      id: "engineering",
+      name: "Engineering Service Co.",
+      locale: "en-CA",
+      timezone: "America/Winnipeg",
+    },
+    {
+      type: "partner",
+      id: "partner",
+      name: "My Patner Inc.",
+      locale: "en-US",
+      timezone: "America/Toronto",
+    },
+    {
+      type: "auditor",
+      id: "auditor",
+      name: "Auditing Authrity Co.",
+      locale: "en-GB",
+      timezone: "Europe/London",
+    },
+  ];
 }
 
-export function getUsers(co: string, num = 0) {
-  const items: any[] = Array.from({ length: num }).map(() => fakeUser(co));
+export function getUsers(num = 0) {
+  const items: any[] = Array.from({ length: num }).map(() => fakeUser());
   items.push(
     {
       name: "Winston Chirchill",
@@ -80,7 +96,7 @@ export function getUsers(co: string, num = 0) {
   return items;
 }
 
-export function fakeUser(co: string) {
+export function fakeUser() {
   const name = faker.person.fullName(), // Rowan Nikolaus
     [firstName, lastName] = name.split(" "),
     username = faker.internet.username({ firstName, lastName }), // 'John.Doe';
@@ -106,11 +122,7 @@ export function fakeUser(co: string) {
 
 const meridians = ["W4", "W5", "W6"];
 export function getWells(num = 0) {
-  const conf: any = readLookups("lookups"),
-    lLookups: any = readLookups("largeLookups"),
-    wellbores: any[] = [];
-
-  const items = Array.from({ length: num }).map(() => {
+  return Array.from({ length: num }).map((_e, i) => {
     const w = faker.helpers.arrayElement(meridians),
       rg = faker.number.int({ min: 1, max: 30 }),
       twp = faker.number.int({ min: 1, max: 126 }),
@@ -173,43 +185,48 @@ export function getWells(num = 0) {
         lithology: (faker.helpers.arrayElement(conf.Lithology) as any).id,
       };
     });
-    const bores: any[] = Array.from({
-      length: faker.number.int({ min: 1, max: 4 }),
-    }).map((_e, i) => {
-      const es = i ? `0${i + 1}` : "00";
-      return {
-        id: [well.id, es].join("-"),
-        name: ["Whole", es, well.name].join("-"),
-        wellId: well.id,
-        es,
-        location: "123",
-        trajectory: (faker.helpers.arrayElement(conf.Trajectory) as any).id,
-        depth: faker.number.float({
-          min: 800,
-          max: 1440,
-          fractionDigits: 2,
-        }),
-        active: faker.datatype.boolean({ probability: 0.7 }),
-      };
-    });
-    wellbores.push(...bores);
+
     return well;
   });
-
-  return [items, wellbores];
 }
 
-function projSets() {
-  return [
-    [0, 1, 2],
-    [0, 1, 2, 3],
-    [2, 3],
-    [2, 3, 4],
-    [0, 2],
-    [1, 2, 4],
-  ];
+function getWellbores(num = 0, cache: any) {
+  const wells: any[] = cache.well,
+    bores: any[] = wells.map((well: any) =>
+      Array.from({
+        length: faker.number.int({ min: 1, max: 4 }),
+      }).map((_e, i) => {
+        const es = i ? `0${i + 1}` : "00";
+        return {
+          id: [well.id, es].join("-"),
+          name: ["Whole", es, well.name].join("-"),
+          wellId: well.id,
+          es,
+          location: "123",
+          trajectory: (faker.helpers.arrayElement(conf.Trajectory) as any).id,
+          depth: faker.number.float({
+            min: 800,
+            max: 1440,
+            fractionDigits: 2,
+          }),
+          active: faker.datatype.boolean({ probability: 0.7 }),
+        };
+      })
+    );
+
+  return bores.flat();
 }
-const Project = [
+
+const projSets = [
+  [0, 1, 2],
+  [0, 1, 2, 3],
+  [2, 3],
+  [2, 3, 4],
+  [0, 2],
+  [1, 2, 4],
+];
+
+const projectTypes = [
     "afe",
     "construction",
     "drilling",
@@ -219,53 +236,51 @@ const Project = [
   ],
   nonActive = ["suspension", "abandonment"],
   timed: any = {
-    afe: ["past", 1],
-    construction: ["past", 1],
-    drilling: [""],
-    completion: ["future", 2],
-    abandonment: ["future", 5],
+    afe: [-12],
+    construction: [-10],
+    drilling: [0],
+    completion: [2],
+    suspension: [60],
+    abandonment: [72],
   },
   dateFunc = {
     past: faker.date.past,
     future: faker.date.future,
   };
-function generateProjects(wells: any[]) {
-  const projects = wells.reduce((acc, w, i) => {
-    let spud = w.spudDate;
-    const set = projSets()[faker.number.int({ min: 0, max: 5 })].map(
-        (e) => Project[e]
-      ),
-      items = set.map((type, i) => {
-        const [dir, years]: [string, number] = timed[type],
-          func: any =
-            dir === "past"
-              ? faker.date.past
-              : dir === "future"
-              ? faker.date.future
-              : undefined,
-          startDate = func?.({ years, refDate: spud }) ?? spud,
-          endDate = faker.date.soon({ days: 90, refDate: spud }),
-          proj = {
-            id: nanoid(10),
-            wellId: w.id,
-            type,
-            startDate,
-            endDate,
-          };
-        return proj;
-      });
-    acc.push(...items);
-    return acc;
+function getProjects(n = 0, cache: any) {
+  const wells: any[] = cache.well,
+    users = cache.user.filter((u: any) => {
+      const roles = u.roles.split(","),
+        allow = roles.includes("office") || roles.includes("power");
+      return allow;
+    }),
+    userSpec = { min: 0, max: users.length - 1 };
+
+  const projects = wells.map((w, i) => {
+    let spud = w.spudDate,
+      num = faker.number.int({ min: 0, max: projSets.length - 1 }),
+      set = projSets[num],
+      year = spud.getFullYear(),
+      month = spud.getMonth(),
+      day = spud.getDate();
+
+    return set.map((e: any) => {
+      const type = projectTypes[e],
+        [months]: [number] = timed[type],
+        start = new Date(year, month + months, day, 12),
+        end = faker.date.soon({ days: 90, refDate: start }),
+        proj = {
+          id: nanoid(10),
+          wellId: w.id,
+          type,
+          start,
+          end,
+          createdBy: users[faker.number.int(userSpec)].id,
+        };
+
+      return proj;
+    });
   }, []);
 
-  return projects;
-}
-
-function readLookups(name: string) {
-  //!!! To update lookups per app.yaml / lookups object
-  //use https://onlineyamltools.com/convert-yaml-to-json
-  const _conf = fs.readFileSync(`./lookups/${name}.json`, {
-    encoding: "utf8",
-  });
-  return JSON.parse(_conf);
+  return projects.flat();
 }

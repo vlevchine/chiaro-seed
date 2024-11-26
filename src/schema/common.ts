@@ -4,12 +4,22 @@ import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const company: any = sqliteTable("companies", {
   id: text("id").primaryKey(),
   name: text("name"),
-  locale: text("locale"),//.notNull(),
+  locale: text("locale"), //.notNull(),
   timezone: text("timezone"),
-  engineering: integer("engineering", { mode: "boolean" }),
-  partner: integer("partner", { mode: "boolean" }),
-  auditor: integer("auditor", { mode: "boolean" }),
-  vendor: integer("vendor", { mode: "boolean" }),
+  type: text("type"), //"engineering" | "partner" | "auditor"
+  // engineering: integer("engineering", { mode: "boolean" }),
+  // partner: integer("partner", { mode: "boolean" }),
+  // auditor: integer("auditor", { mode: "boolean" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
+
+export const vendor: any = sqliteTable("vendors", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+  type: text("type"),
+  muds: integer("muds", { mode: "boolean" }),
   createdAt: integer("created_at", { mode: "timestamp" }).default(
     sql`(unixepoch())`
   ),
@@ -29,24 +39,13 @@ export const user: any = sqliteTable("users", {
   deactivated: integer("deactivated_at", { mode: "timestamp" })
 });
 
-export const wellBore = sqliteTable("wells", {
+//!!! - removced unique, as it's hard to auto-gen those
+export const well = sqliteTable("wells", {
     id: text("id").primaryKey(),
-    wellId: text("well_id")
-      .notNull()
-      .references(() => well.id, { onDelete: "cascade" }),
-    name: text("name").unique().notNull(),
-    es: text("name"),
-    trajectory: text("trajectory"),
-    location: text("location"),
-    depth: real("depth"),
-    active: integer("active", { mode: "boolean" }),
-  }),
-  well = sqliteTable("wells", {
-    id: text("id").primaryKey(),
-    name: text("name").unique().notNull(),
-    alias: text("alias").unique(),
-    type: text("email").unique().notNull(),
-    license: text("license").unique(),
+    name: text("name"),//.unique(),
+    alias: text("alias"),//.unique(),
+    type: text("type").notNull(),
+    license: text("license"),//.unique(),
     licensee: text("licensee"),
     licenseType: text("license_type"),
     landOwner: text("land_owner"),
@@ -68,6 +67,18 @@ export const wellBore = sqliteTable("wells", {
     md: real("md"),
     formations: text("formations", { mode: "json" }).$type<Formation[]>(),
     directions: text("directions"),
+  }),
+  wellBore = sqliteTable("wellbores", {
+    id: text("id").primaryKey(),
+    wellId: text("well_id")
+      .notNull()
+      .references(() => well.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    es: text("name"),
+    trajectory: text("trajectory"),
+    location: text("location"),
+    depth: real("depth"),
+    active: integer("active", { mode: "boolean" }),
   });
 
 export const userRelations = relations(user, ({ one }) => ({
@@ -80,12 +91,7 @@ export const userRelations = relations(user, ({ one }) => ({
 export const wellRelations = relations(well, ({ many }) => ({
   wellbores: many(wellBore)
 }))
-// export const postsRelations = relations(posts, ({ one }) => ({
-//   author: one(users, {
-//     fields: [posts.authorId],
-//     references: [users.id],
-//   }),
-// }));
+
 //Types
 type Bounds = {
   ns: number;
