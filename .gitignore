@@ -16,3 +16,7 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+
+#remove from repo
+# git rm -r --cached some-directory
+# then commit and save

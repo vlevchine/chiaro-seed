@@ -29,14 +29,17 @@ export const user: any = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   username: text("username").unique(),
+  password: text("password").unique(),
   email: text("email").unique(),
   roles: text("roles").notNull(),
   approvalLevel: integer("approval_level", { mode: "number" }).default(0),
-  affiliationId: text("affiliation_id").references(() => company.id, { onDelete: "cascade" }),
+  affiliationId: text("affiliation_id").references(() => company.id, {
+    onDelete: "cascade",
+  }),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
     sql`(unixepoch() * 1000)`
   ),
-  deactivated: integer("deactivated_at", { mode: "timestamp" })
+  deactivated: integer("deactivated_at", { mode: "timestamp" }),
 });
 
 //!!! - removced unique, as it's hard to auto-gen those

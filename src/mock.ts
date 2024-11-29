@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
-
+import { hashPassword, verifyPassword } from "./helpers";
 const specialRoles = ["power", "partner", "audit"],
   roleSets = [
     "admin",
@@ -26,15 +26,17 @@ export const generate: any = {
     lLookups = _lLookups;
   };
 
-export function getVendors(num = 0) {
-  return Array.from({ length: num }).map(() => ({
-    id: nanoid(10),
-    name: faker.company.name(),
-    type: "muds",
-    muds: true,
-  }));
+export async function getVendors(num = 0) {
+  return Promise.resolve(
+    Array.from({ length: num }).map(() => ({
+      id: nanoid(10),
+      name: faker.company.name(),
+      type: "muds",
+      muds: true,
+    }))
+  );
 }
-export function getCompanies() {
+export async function getCompanies() {
   return [
     {
       type: "engineering",
@@ -60,43 +62,47 @@ export function getCompanies() {
   ];
 }
 
-export function getUsers(num = 0) {
-  const items: any[] = Array.from({ length: num }).map(() => fakeUser());
-  items.push(
-    {
-      name: "Winston Chirchill",
-      username: "winston.chirchill",
-      email: `winston.chirchill@${co}.io`,
-      roles: "auditor",
-      affiliationId: "auditor",
-    },
-    {
-      name: "Woodrow Wilson",
-      username: "woodrow.wilson",
-      email: `woodrow.wilson@${co}.io`,
-      roles: "engineering",
-      affiliationId: "engineering",
-    },
-    {
-      name: "Franklin Roosevelt",
-      username: "franklin.roosevelt",
-      email: `franklin.roosevelt@${co}.io`,
-      roles: "partner",
-      affiliationId: "partner",
-    },
-    {
-      name: "Ronald Reagan",
-      username: "ronald.reagan",
-      email: `ronald.reagan@${co}.io`,
-      roles: "power",
-      approvalLevel: 100000000,
-    }
-  );
+export async function getUsers(num = 0) {
+  const items = [
+      {
+        name: "Winston Chirchill",
+        username: "winston.chirchill",
+        email: `winston.chirchill@${co}.io`,
+        roles: "auditor",
+        affiliationId: "auditor",
+      },
+      {
+        name: "Woodrow Wilson",
+        username: "woodrow.wilson",
+        email: `woodrow.wilson@${co}.io`,
+        roles: "engineering",
+        affiliationId: "engineering",
+      },
+      {
+        name: "Franklin Roosevelt",
+        username: "franklin.roosevelt",
+        email: `franklin.roosevelt@${co}.io`,
+        roles: "partner",
+        affiliationId: "partner",
+      },
+      {
+        name: "Ronald Reagan",
+        username: "ronald.reagan",
+        email: `ronald.reagan@${co}.io`,
+        roles: "power",
+        approvalLevel: 100000000,
+      },
+      ...Array.from({ length: num }).map((e: any, i: number) => fakeUser()),
+    ],
+    psw = await Promise.all(
+      Array.from({ length: items.length }).map((e: any) => hashPassword("4321"))
+    );
+  items.forEach((e: any, i: number) => {e.password = psw[i]})
 
   return items;
 }
 
-export function fakeUser() {
+function fakeUser() {
   const name = faker.person.fullName(), // Rowan Nikolaus
     [firstName, lastName] = name.split(" "),
     username = faker.internet.username({ firstName, lastName }), // 'John.Doe';
@@ -106,7 +112,7 @@ export function fakeUser() {
       min: 100000,
       max: 10000000,
       multipleOf: 100000,
-    }); // 50; // Kassandra.Haley@northern.com
+    });
   let roles = roleSets[roleSeed];
   if (approvalLevel > 1000000 && !roles.split(",").includes("office"))
     roles += ",office";
@@ -121,7 +127,7 @@ export function fakeUser() {
 }
 
 const meridians = ["W4", "W5", "W6"];
-export function getWells(num = 0) {
+export async function getWells(num = 0) {
   return Array.from({ length: num }).map((_e, i) => {
     const w = faker.helpers.arrayElement(meridians),
       rg = faker.number.int({ min: 1, max: 30 }),
@@ -190,7 +196,7 @@ export function getWells(num = 0) {
   });
 }
 
-function getWellbores(num = 0, cache: any) {
+export async function getWellbores(num = 0, cache: any) {
   const wells: any[] = cache.well,
     bores: any[] = wells.map((well: any) =>
       Array.from({
@@ -247,7 +253,7 @@ const projectTypes = [
     past: faker.date.past,
     future: faker.date.future,
   };
-function getProjects(n = 0, cache: any) {
+async function getProjects(n = 0, cache: any) {
   const wells: any[] = cache.well,
     users = cache.user.filter((u: any) => {
       const roles = u.roles.split(","),
@@ -283,4 +289,47 @@ function getProjects(n = 0, cache: any) {
   }, []);
 
   return projects.flat();
+}
+
+export function getTenants(ids: string[]) {
+  const items: any[] = ids.map((id: string) => {
+    return {
+      id,
+      email: `contact@${id}.com`,
+      contact: faker.person.fullName(),
+      name: `${id[0].toUpperCase()}${id.slice(1)} ${faker.company.buzzNoun()} Inc.`,
+      locale: "en-CA",
+      timezone: "America/Toronto",
+      numLicenses: faker.number.int({ min: 2, max: 10 }),
+      // pages: text("pages"),
+      // roles: text("roles"),
+    };
+  });
+  return items;
+}
+
+export function testSession(tenant: any, user: any) {
+  // return {
+  //   id: nanoid(),
+  //   tenantId: tenant.id,
+  //   userId: user.id,
+  //   impersonatorId: 0,
+  //   name: user.name,
+  //   username: user.username,
+  //   locale: tenant.locale,
+  //   roles: user.roles,
+  //   type: "none",
+  //   expiresAt: new Date(Date.now() + 36000000),
+  // };
+  return {
+  id: 'P5SbsgtRNK5bQXdgm8ONp1',
+  tenantId: 'northern',
+  userId: 4,
+  impersonatorId: 0,
+  name: 'Ronald Reagan',
+  username: 'ronald.reagan',
+  locale: 'en-CA',
+  roles: 'power',
+  expiresAt: new Date(Date.now() + 36000000)//2024-12-28T18:15:01.267Z
+} 
 }
