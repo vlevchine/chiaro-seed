@@ -1,6 +1,6 @@
 import { defineConfig } from 'drizzle-kit';
 
-const id = 'registry'; //'northern';
+const id = 'northern'; // 'registry'
 
 export default defineConfig({
   dialect: "sqlite",

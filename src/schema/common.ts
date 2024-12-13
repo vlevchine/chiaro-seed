@@ -45,10 +45,12 @@ export const user: any = sqliteTable("users", {
 //!!! - removced unique, as it's hard to auto-gen those
 export const well = sqliteTable("wells", {
     id: text("id").primaryKey(),
-    name: text("name"),//.unique(),
-    alias: text("alias"),//.unique(),
+    name: text("name"), //.unique(),
+    alias: text("alias"), //.unique(),
     type: text("type").notNull(),
-    license: text("license"),//.unique(),
+    active: integer("active", { mode: "boolean" }),
+    uwi: text("uwi"),
+    license: text("license"), //.unique(),
     licensee: text("licensee"),
     licenseType: text("license_type"),
     landOwner: text("land_owner"),
@@ -59,8 +61,7 @@ export const well = sqliteTable("wells", {
     surveyType: text("survey_type"),
     siteAccess: text("site_access"),
     geo: text("geo", { mode: "json" }).$type<Geo>(),
-    surface: text("area"),
-    es: text("area"),
+    surface: text("surface"),
     ground: real("ground"),
     bounds: text("bounds", { mode: "json" }).$type<Bounds>(),
     kb: real("kb"),
@@ -77,12 +78,47 @@ export const well = sqliteTable("wells", {
       .notNull()
       .references(() => well.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
-    es: text("name"),
+    uwi: text("uwi"),
     trajectory: text("trajectory"),
     location: text("location"),
     depth: real("depth"),
     active: integer("active", { mode: "boolean" }),
   });
+
+  export const project = sqliteTable(
+    "projects",
+    {
+      id: text("id").primaryKey(),
+      type: text("name").notNull(),
+      start: integer("start", { mode: "timestamp" }), //text("start").default(sql`(CURRENT_DATE)`),
+      end: integer("end", { mode: "timestamp" }),
+      createdBy: integer("createdby")
+        .notNull()
+        .references(() => user.id, { onDelete: "cascade" }),
+      wellId: integer("asset_id")
+        .notNull()
+        .references(() => well.id, { onDelete: "cascade" }),
+    }
+    // (table) => ({
+    //   startIndex: index("start_index").on(table.start),
+    //   endIndex: index("end_index").on(table.end),
+    //   timeUniqueConstraint: unique("time_unique_constraint").on(
+    //     table.start,
+    //     table.createdBy
+    //   ),
+    // })
+  );
+
+  export const projectRelations = relations(project, ({ one }) => ({
+    createdBy: one(user, {
+      fields: [project.createdBy],
+      references: [user.id],
+    }),
+    well: one(well, {
+      fields: [project.wellId],
+      references: [well.id],
+    }),
+  }));
 
 export const userRelations = relations(user, ({ one }) => ({
   affiliation: one(company, {
@@ -92,7 +128,8 @@ export const userRelations = relations(user, ({ one }) => ({
 }));
 
 export const wellRelations = relations(well, ({ many }) => ({
-  wellbores: many(wellBore)
+  wellbores: many(wellBore),
+  projects: many(project)
 }))
 
 //Types

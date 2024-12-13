@@ -7,7 +7,7 @@ import * as northern from "./schema/northern";
 import * as registry from "./schema/registry";
 import * as western from "./schema/western";
 
-const co = "registry"; //"northern";
+const co: string = "northern"; //"registry"
 
 const clientSchemas: any = { registry, northern, western },
   schema: any = clientSchemas[co];
@@ -35,14 +35,13 @@ async function seedClient(): Promise<void> {
   // const res = await db.query.user.findMany({with: {affiliation: true}});
   // console.log(res.filter((u: any) => u.affiliation))
   for await (const [tbl, prm, ch, ch1] of items) {
-    //t0 = Date.now();
     if (ch && !cached[ch]) cached[ch] = await db.select().from(schema[ch]);
     if (ch1 && !cached[ch1]) cached[ch1] = await db.select().from(schema[ch1]);
     const values: any[] = await generate[tbl](prm, cached);
-    //  const res = await writeTable(db, schema[tbl], values);
-    // console.log(tbl, values.at(0));
+  console.log('writing to:', tbl, values.length);
+    const res = await writeTable(db, schema[tbl], values);
     const result = await db.select().from(schema[tbl]);
-    console.log(tbl, result?.length);
+    console.log('finished writing to:', tbl, result?.length);
   }
   console.log(`finished: ${Date.now() - t0}ms`);
 }

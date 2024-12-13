@@ -142,6 +142,8 @@ export async function getWells(num = 0) {
         name: faker.commerce.productName(),
         alias: faker.lorem.word(),
         type: (faker.helpers.arrayElement(conf.WellType) as any).id,
+        active: faker.datatype.boolean({ probability: 0.7 }),
+        uwi: '',
         license: faker.airline.recordLocator(),
         licensee: faker.company.name(),
         leaseType: (faker.helpers.arrayElement(conf.LeaseType) as any).id,
@@ -149,11 +151,11 @@ export async function getWells(num = 0) {
         trajectory: (faker.helpers.arrayElement(conf.Trajectory) as any).id,
         area: faker.helpers.arrayElement(lLookups.areas),
         field: faker.helpers.arrayElement(lLookups.fields),
-        surveyType: (faker.helpers.arrayElement(conf.Survey) as any).id,
+        surveyType: (conf.Survey[0] as any).id,
         siteAccess: (faker.helpers.arrayElement(conf.SiteAccess) as any).id,
         jurisdiction: (faker.helpers.arrayElement(conf.Jurisdiction) as any).id,
         surface: [[lsd, sc, twp, rg].join("-"), w].join(" "),
-        es: "00", //event seq: 0 - for welll, 2... for new wellbores
+       // es: "00", //event seq: 0 - for welll, 2... for new wellbores
         bounds: {
           ns: faker.number.int({ min: -300, max: 300 }),
           we: faker.number.int({ min: -500, max: 500 }),
@@ -175,6 +177,7 @@ export async function getWells(num = 0) {
         directions:
           "Take a long way home... then take left on HWY72, cross the bridge. Follow the road for 2km. You should find it near the river.",
       };
+    well.uwi = ["00", well.surface.replaceAll(' ', ''),"0"].join('/');
     well.formations = Array.from({
       length: faker.number.int({ min: 2, max: 5 }),
     }).map((_e, i) => {
@@ -198,16 +201,17 @@ export async function getWells(num = 0) {
 
 export async function getWellbores(num = 0, cache: any) {
   const wells: any[] = cache.well,
-    bores: any[] = wells.map((well: any) =>
-      Array.from({
+    bores: any[] = wells.map((well: any) => {
+      const w_uwi = well.uwi.split('/');
+      return Array.from({
         length: faker.number.int({ min: 1, max: 4 }),
       }).map((_e, i) => {
         const es = i ? `0${i + 1}` : "00";
         return {
           id: [well.id, es].join("-"),
-          name: ["Whole", es, well.name].join("-"),
+          name: ["Whole", es].join("-"),
           wellId: well.id,
-          es,
+          uwi: [w_uwi[0], w_uwi[1], es].join('/'),
           location: "123",
           trajectory: (faker.helpers.arrayElement(conf.Trajectory) as any).id,
           depth: faker.number.float({
@@ -217,7 +221,8 @@ export async function getWellbores(num = 0, cache: any) {
           }),
           active: faker.datatype.boolean({ probability: 0.7 }),
         };
-      })
+      });
+    }
     );
 
   return bores.flat();
