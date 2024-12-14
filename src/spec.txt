@@ -1,0 +1,56 @@
+Well - see file:///C:/Users/valev/Downloads/WellStatusClassificationV3_2020.pdf
+ - name - text
+ - alias - text
+ - uwi - text- 100/12-04-091-05-W5/00
+ - Product Type (fluid) / qualifier
+ Oil (Fine light, Premium light, Light, Medium, bitumen, Naphtha), 
+ Gas (Methane, Ethane, Etane Plus, Propane, Butane, Pentane), 
+ Non-hydrocarbon Gas (Air,Carbon Dioxide,Hydrogen Sulfide, Helium, Hydrogen, nitrogen, Oxygen), 
+ Steam, 
+ Water (Alkaline, Brine, Salt, Brakish, fresh, combination) 
+ - Well Status - active, inactive (shut-in, idle, abandoned) 
+
+General:
+- regulatory area - list or tree 
+- lisense - text
+- licensee ??? - operator ???
+- land owner - select
+- lease type - select
+- lahee class - select: Wildcat well, Outpost, Appraisal, Development,Re-entry, Test hole, Experimental, Other
+- confidentiality - select : confidential, non-conf, conf below
+- business interest: Financial – Operated,Financial - Non-operated, Obligatory, Technical, No Business Interest 
+- business intention - explore, appraise, extend, Development
+- Outcome: achieved, unachived, undetrmined
+- role: Inject ( Single product, Multiple Products), Produce/Inject (Simultanious, Cysclic)), Service (Supply, storage, relief, observation), Research
+- Play type - conventional, shale, oil sands, Coalbed Methane, Gas Hydrate , Tight Sand, Sub-salt, Non-hydrocarbon , Carbon Capture and Storage  
+- area /field ????
+
+Location
+- geo - lat, lon - number vs mask (deg,m,s, S|N W|E)
+ - surface location - DLS/NTS - mask (DLs - 1NN/12-04-091-05-W5, NTS - 2NN/a-20-B/094-H-09)
+- UTM coordinates (bounds): zone: 20T - Easting: 714272m E - Northing: 5116923m N
+- site access - select
+- directions: textarea
+
+Details
+H2S Present - checkbox.
+Trajectory / Profile type - vertical, inclined ( slant hole, S-type, Deep inclined), horizontal (Toe-up, Toe-down, Level, Undulating) 
+Well structure - simple, Simplex, Compound, Complex, Network
+Fluid Direction - inflow, outflow, static, cyclic.
+Elevatons: currently - ground, kb, tvd, md 
+ - ground - number
+ - Kelly Bushing
+ - Tubing Hanger Flange
+ - Casing Flange
+ - default datum - ?
+
+Formations - remove
+
+- Cororate hierarchy - tree
+ Partners: list of  name, WI %
+
+ Wellbores - table non-editable, link to wellbore page
+ -name, uwi /02, parent, status
+Each well has default wellbore /00
+
+Projects - reference well and multiple wellbores 
