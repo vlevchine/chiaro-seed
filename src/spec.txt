@@ -34,13 +34,13 @@ Location
 
 Details
 H2S Present - checkbox.
-Trajectory / Profile type - vertical, inclined ( slant hole, S-type, Deep inclined), horizontal (Toe-up, Toe-down, Level, Undulating) 
+
 Well structure - simple, Simplex, Compound, Complex, Network
 Fluid Direction - inflow, outflow, static, cyclic.
 Elevatons: currently - ground, kb, tvd, md 
  - ground - number
  - Kelly Bushing
- - Tubing Hanger Flange
+ - Tubing Hanger Flang
  - Casing Flange
  - default datum - ?
 
@@ -54,3 +54,27 @@ Formations - remove
 Each well has default wellbore /00
 
 Projects - reference well and multiple wellbores 
+
+Wellbore
+- name
+- parent
+- uwi - well uwi/02
+- Trajectory / Profile type - vertical, inclined ( slant hole, S-type, Deep inclined), horizontal (Toe-up, Toe-down, Level, Undulating) 
+- depths - kick-off point KOP - md, tvd , Total depth - md, tvd
+- Reason Code -: Deviation, Sidetrack Fish, Horizontal, Reason Cod
+
+- Perforations: table: date, name, top, bottom, TS-BS (bottom - top),
+Gun OD (in), shot density (shots/ft), Phasing (degree),charge weight (oz),
+carrier Manufacturer (select), carrier type (select), purpose (select - production),
+all shots fired (switch), shots misfied (number), comments (textarea)
+
+- Formations: tablename, Prog Top (mGE), Prog Bottom (mGE), Prog Top (TVD) (mGE), Prog Bottom (TVD) (mGE)
+Samples: date, samples Top(MD), samples Bottom (MD), samples Top (TVD), samples Bottom (TVD)
+Logs: date, logs Top(MD), logs Bottom (MD), logs Top (TVD), logs Bottom (TVD)
+comments - textarea
+#all depths in mGE
+
+- Planned survey - table
+MD (mGE), Incl, azimuth, TVD(mGE)
+comments (textarea)
+calculations: https://www.linkedin.com/pulse/directional-survey-methods-carlos-moura
