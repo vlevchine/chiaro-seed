@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
-import { hashPassword, verifyPassword } from "./helpers";
+import { hashPassword } from "./helpers";
+import { getOperators } from "drizzle-orm";
+
 const specialRoles = ["power", "partner", "audit"],
   roleSets = [
     "admin",
@@ -9,7 +11,9 @@ const specialRoles = ["power", "partner", "audit"],
     "activity,field",
     "office,activity,field",
     "field",
-  ];
+  ],
+  from: (arr: any[]) => any = (arr: any[]) =>
+    faker.helpers.arrayElement(arr as any);
 
 let co: string, conf: any, lLookups: any;
 export const generate: any = {
@@ -17,7 +21,7 @@ export const generate: any = {
     company: getCompanies,
     user: getUsers,
     well: getWells,
-    wellBore: getWellbores,
+    wellbore: getWellbores,
     project: getProjects,
   },
   init = (_co: string, _conf: any, _lLookups: any) => {
@@ -36,56 +40,35 @@ export async function getVendors(num = 0) {
     }))
   );
 }
-export async function getCompanies() {
-  return [
-    {
-      type: "engineering",
-      id: "engineering",
-      name: "Engineering Service Co.",
-      locale: "en-CA",
-      timezone: "America/Winnipeg",
-    },
-    {
-      type: "partner",
-      id: "partner",
-      name: "My Patner Inc.",
-      locale: "en-US",
-      timezone: "America/Toronto",
-    },
-    {
-      type: "auditor",
-      id: "auditor",
-      name: "Auditing Authrity Co.",
-      locale: "en-GB",
-      timezone: "Europe/London",
-    },
-  ];
-}
+
 
 export async function getUsers(num = 0) {
   const items = [
       {
+        id: "winston",
         name: "Winston Chirchill",
         username: "winston.chirchill",
         email: `winston.chirchill@${co}.io`,
-        roles: "auditor",
-        affiliationId: "auditor",
+        roles: "wellMng,activity",
       },
       {
+        id: "woodrow",
         name: "Woodrow Wilson",
         username: "woodrow.wilson",
         email: `woodrow.wilson@${co}.io`,
         roles: "engineering",
-        affiliationId: "engineering",
+        affiliationId: "eng_united",
       },
       {
+        id: "franklin",
         name: "Franklin Roosevelt",
         username: "franklin.roosevelt",
         email: `franklin.roosevelt@${co}.io`,
         roles: "partner",
-        affiliationId: "partner",
+        affiliationId: "partner1",
       },
       {
+        id: "ronald",
         name: "Ronald Reagan",
         username: "ronald.reagan",
         email: `ronald.reagan@${co}.io`,
@@ -97,7 +80,9 @@ export async function getUsers(num = 0) {
     psw = await Promise.all(
       Array.from({ length: items.length }).map((e: any) => hashPassword("4321"))
     );
-  items.forEach((e: any, i: number) => {e.password = psw[i]})
+  items.forEach((e: any, i: number) => {
+    e.password = psw[i];
+  });
 
   return items;
 }
@@ -118,6 +103,7 @@ function fakeUser() {
     roles += ",office";
 
   return {
+    id: nanoid(10),
     name,
     username,
     email,
@@ -126,104 +112,120 @@ function fakeUser() {
   };
 }
 
-const meridians = ["W4", "W5", "W6"];
+const meridians = ["W4", "W5", "W6"],
+ partners = ["partner1", "partner2"];;
 export async function getWells(num = 0) {
-  return Array.from({ length: num }).map((_e, i) => {
-    const w = faker.helpers.arrayElement(meridians),
-      rg = faker.number.int({ min: 1, max: 30 }),
-      twp = faker.number.int({ min: 1, max: 126 }),
-      sc = faker.number.int({ min: 1, max: 36 }),
-      lsd = faker.number.int({ min: 1, max: 16 }),
-      spudDate = faker.date.between({ from: "2010-01-01", to: "2020-01-01" }),
-      ground = faker.number.float({ min: 50, max: 240, fractionDigits: 2 }),
-      tvd = ground + faker.number.int({ min: 500, max: 1000 }),
-      well: any = {
-        id: nanoid(10),
-        name: faker.commerce.productName(),
-        alias: faker.lorem.word(),
-        type: (faker.helpers.arrayElement(conf.WellType) as any).id,
-        active: faker.datatype.boolean({ probability: 0.7 }),
-        uwi: '',
-        license: faker.airline.recordLocator(),
-        licensee: faker.company.name(),
-        leaseType: (faker.helpers.arrayElement(conf.LeaseType) as any).id,
-        landOwner: (faker.helpers.arrayElement(conf.LandOwner) as any).id,
-        trajectory: (faker.helpers.arrayElement(conf.Trajectory) as any).id,
-        area: faker.helpers.arrayElement(lLookups.areas),
-        field: faker.helpers.arrayElement(lLookups.fields),
-        surveyType: (conf.Survey[0] as any).id,
-        siteAccess: (faker.helpers.arrayElement(conf.SiteAccess) as any).id,
-        jurisdiction: (faker.helpers.arrayElement(conf.Jurisdiction) as any).id,
-        surface: [[lsd, sc, twp, rg].join("-"), w].join(" "),
-       // es: "00", //event seq: 0 - for welll, 2... for new wellbores
-        bounds: {
-          ns: faker.number.int({ min: -300, max: 300 }),
-          we: faker.number.int({ min: -500, max: 500 }),
-        },
-        geo: {
-          lat: faker.location.latitude({ max: 58, min: 53, precision: 7 }), // 55.7482933,
-          lon: faker.location.longitude({ max: -115, min: -120, precision: 7 }), //- 118.3865941,
-        },
-        h2s: 0.04,
-        spudDate,
-        ground,
-        kb: faker.number.float({
-          min: 1,
-          max: 10,
+  const _partners: any[] = [],
+    names = Array.from(new Set(Array.from({ length: num * 2}).map(() => faker.location.city()))),
+    wells = Array.from({ length: num }).map((_e, i) => {
+      const w = from(meridians),
+        rg = faker.number.int({ min: 1, max: 30 }),
+        twp = faker.number.int({ min: 1, max: 126 }),
+        sc = faker.number.int({ min: 1, max: 36 }),
+        lsd = faker.number.int({ min: 1, max: 16 }),
+        surface: any = [[lsd, sc, twp, rg].join("-"), w].join(" "),
+        spudDate = faker.date.between({ from: "2010-01-01", to: "2020-01-01" }),
+        ground = faker.number.float({ min: 50, max: 240, fractionDigits: 2 }),
+        wellType = from(conf.WellType),
+        kb = faker.number.float({
+          min: 4,
+          max: 20,
           fractionDigits: 1,
         }),
-        tvd,
-        md: tvd + faker.number.int({ min: 0, max: 100 }),
-        directions:
-          "Take a long way home... then take left on HWY72, cross the bridge. Follow the road for 2km. You should find it near the river.",
-      };
-    well.uwi = ["00", well.surface.replaceAll(' ', ''),"0"].join('/');
-    well.formations = Array.from({
-      length: faker.number.int({ min: 2, max: 5 }),
-    }).map((_e, i) => {
-      return {
-        id: "_" + i,
-        name: faker.helpers.arrayElement(lLookups.formations),
-        top: 570 + i * 200,
-        bottom: 650 + i * 200,
-        porosity: faker.number.float({
-          min: 0.1,
-          max: 0.8,
-          fractionDigits: 2,
-        }),
-        lithology: (faker.helpers.arrayElement(conf.Lithology) as any).id,
-      };
+        well: any = {
+          id: nanoid(10),
+          name: names[i],
+          alias: faker.lorem.word(),
+          type: wellType.id,
+          jurisdiction: from(from(conf.Jurisdiction).items).id,
+          hierarchy: getHierarchy(),
+          ownerId: getOwner(),
+          operatorId: getOperator(),
+          status: from(conf.Status).id,
+          subType: wellType.items ? from(wellType.items).id : undefined,
+          surface: "200/" + surface,
+          uwi: ["200", surface.replaceAll(" ", ""), "00"].join("/"),
+          h2s: faker.datatype.boolean({ probability: 0.7 }),
+          license: faker.airline.recordLocator(),
+          leaseType: from(conf.LeaseType).id,
+          landOwner: from(conf.LandOwner).id,
+          class: from(conf.LaheeClass).id,
+          confidentiality: from(conf.Confidentiality).id,
+          businessInterest: from(conf.BusinessInterest).id,
+          businessIntention: from(conf.BusinessIntention).id,
+          outcome: from(conf.Outcome).id,
+          role: from(conf.Role).id,
+          playType: from(conf.PlayType).id,
+          wellStructure: from(conf.WellStructure).id,
+          fluidDirection: from(conf.FluidDirection).id,
+          siteAccess: from(conf.SiteAccess).id,
+          directions:
+            "Take a long way home... then take left on HWY72, cross the bridge. Follow the road for 2km. You should find it near the river.",
+          ground,
+          kb,
+          cf: kb - 1,
+          thf: kb - 3,
+          lat: faker.location.latitude({ max: 58, min: 53, precision: 7 }), // 55.7482933,
+          lon: faker.location.longitude({ max: -115, min: -120, precision: 7 }), //- 118.3865941,
+          utm: {
+            zone: `Zone ${faker.number.int({ min: 0, max: 30 })}`,
+            ns: faker.number.int({ min: -300, max: 300 }),
+            we: faker.number.int({ min: -500, max: 500 }),
+          },
+          spudDate,
+        };
+      if (Math.random() > 0.5)
+        Array.from({ length: faker.number.int({ min: 1, max: 2 }) }).forEach(
+          (e, i) => {
+            _partners.push({
+              wellId: well.id,
+              companyId: partners[i],
+              share: 0.3,
+            });
+          }
+        );
+
+      return well;
     });
 
-    return well;
-  });
+  return [wells, _partners];
 }
+
 
 export async function getWellbores(num = 0, cache: any) {
   const wells: any[] = cache.well,
     bores: any[] = wells.map((well: any) => {
-      const w_uwi = well.uwi.split('/');
-      return Array.from({
-        length: faker.number.int({ min: 1, max: 4 }),
-      }).map((_e, i) => {
-        const es = i ? `0${i + 1}` : "00";
-        return {
-          id: [well.id, es].join("-"),
-          name: ["Whole", es].join("-"),
-          wellId: well.id,
-          uwi: [w_uwi[0], w_uwi[1], es].join('/'),
-          location: "123",
-          trajectory: (faker.helpers.arrayElement(conf.Trajectory) as any).id,
-          depth: faker.number.float({
+      const w_uwi = well.uwi.split("/");
+      const tvd = faker.number.float({
             min: 800,
             max: 1440,
             fractionDigits: 2,
-          }),
-          active: faker.datatype.boolean({ probability: 0.7 }),
+      }),
+        kopTVD = faker.number.float({
+            min: 50,
+            max: 140,
+            fractionDigits: 2,
+      });
+      return Array.from({
+        length: faker.number.int({ min: 1, max: 4 }),
+      }).map((_e, i) => {
+        const es = i ? `0${i + 1}` : "00",
+          id = [well.id, es].join("_");
+        return {
+          id,
+          name: ["Whole", es].join("-"),
+          wellId: well.id,
+          parentId: i === 1 ? well.id + '_00'  : undefined,
+          uwi: [w_uwi[0], w_uwi[1], es].join("/"),
+          tvd,
+          md: tvd + faker.number.int({ min: 0, max: 50 }),
+          kopTVD,
+          kopMD: kopTVD + faker.number.int({ min: 0, max: 10 }),
+          trajectory: (faker.helpers.arrayElement(conf.Trajectory) as any).id,
+          reason: from(conf.DeviationReason).id,
         };
       });
-    }
-    );
+    });
 
   return bores.flat();
 }
@@ -262,10 +264,10 @@ async function getProjects(n = 0, cache: any) {
   const wells: any[] = cache.well,
     users = cache.user.filter((u: any) => {
       const roles = u.roles.split(","),
-        allow = roles.includes("office") || roles.includes("power");
+        allow = roles.includes("wellMng") || roles.includes("power");
       return allow;
     }),
-    userSpec = { min: 0, max: users.length - 1 };
+    _proj_bores: any[] = [];
 
   const projects = wells.map((w, i) => {
     let spud = w.spudDate,
@@ -286,14 +288,15 @@ async function getProjects(n = 0, cache: any) {
           type,
           start,
           end,
-          createdBy: users[faker.number.int(userSpec)].id,
+          createdBy: from(users).id,
         };
-
+        if (type === 'drilling') _proj_bores.push({wellboreId: w.id + '_00', projectId: proj.id})
       return proj;
     });
-  }, []);
+  }, []),
+    _projects = projects.flat();
 
-  return projects.flat();
+  return [_projects, _proj_bores];
 }
 
 export function getTenants(ids: string[]) {
@@ -302,7 +305,9 @@ export function getTenants(ids: string[]) {
       id,
       email: `contact@${id}.com`,
       contact: faker.person.fullName(),
-      name: `${id[0].toUpperCase()}${id.slice(1)} ${faker.company.buzzNoun()} Inc.`,
+      name: `${id[0].toUpperCase()}${id.slice(
+        1
+      )} ${faker.company.buzzNoun()} Inc.`,
       locale: "en-CA",
       timezone: "America/Toronto",
       numLicenses: faker.number.int({ min: 2, max: 10 }),
@@ -327,14 +332,97 @@ export function testSession(tenant: any, user: any) {
   //   expiresAt: new Date(Date.now() + 36000000),
   // };
   return {
-  id: 'P5SbsgtRNK5bQXdgm8ONp1',
-  tenantId: 'northern',
-  userId: 4,
-  impersonatorId: 0,
-  name: 'Ronald Reagan',
-  username: 'ronald.reagan',
-  locale: 'en-CA',
-  roles: 'power',
-  expiresAt: new Date(Date.now() + 36000000)//2024-12-28T18:15:01.267Z
-} 
+    id: "P5SbsgtRNK5bQXdgm8ONp1",
+    tenantId: "northern",
+    userId: 4,
+    impersonatorId: 0,
+    name: "Ronald Reagan",
+    username: "ronald.reagan",
+    locale: "en-CA",
+    roles: "power",
+    expiresAt: new Date(Date.now() + 36000000), //2024-12-28T18:15:01.267Z
+  };
+}
+
+
+  const hier = [
+    {
+      id: "tier1",
+      name: "Tiier 1",
+      items: [
+        { id: "Group 1", name: "tier1.group1" },
+        { id: "Group 2", name: "tier1.group2" },
+        { id: "Group 3", name: "tier1.group3" },
+      ],
+    },
+    {
+      id: "tier2",
+      name: "Tiier 2",
+      items: [
+        { id: "Group 1", name: "tier2.group1" },
+        { id: "Group 2", name: "tier2.group2" },
+        { id: "Group 3", name: "tier2.group3" },
+        { id: "Group 4", name: "tier2.group4" },
+      ],
+    },
+];
+function getHierarchy() {
+  const top: any = hier[faker.number.int({ min: 0, max: 1})]
+  return top[faker.number.int({ min: 0, max: 2 })]
+}
+const companies = [
+  {
+    id: "eng_serv",
+    name: "Engineering Service Co.",
+    engineering: true,
+    locale: "en-CA",
+    timezone: "America/Winnipeg",
+  },
+  {
+    id: "eng_united",
+    name: "United Engineering Corp.",
+    engineering: true,
+    locale: "en-US",
+    timezone: "America/Winnipeg",
+  },
+  {
+    id: "global",
+    name: "Global Oil and Gas Corp.",
+    engineering: true,
+    ogc: true,
+    locale: "en-US",
+    timezone: "America/Winnipeg",
+  },
+  {
+    partner: true,
+    id: "partner1",
+    name: "Financial Hub Inc.",
+    locale: "en-US",
+    timezone: "America/Toronto",
+  },
+  {
+    partner: true,
+    id: "partner2",
+    name: "Venture Club Inc.",
+    locale: "en-US",
+    timezone: "America/Toronto",
+  },
+  {
+    type: "auditor",
+    id: "auditor",
+    name: "Auditing Authrity Co.",
+    locale: "en-GB",
+    timezone: "Europe/London",
+  },
+],
+  eng = ['eng_united', 'eng_serv', 'global'];
+
+export async function getCompanies() {
+  return companies
+}
+function getOperator() {
+  return Math.random() > 0.5 ? from(eng) : undefined
+}
+function getOwner() {
+  return;
 }

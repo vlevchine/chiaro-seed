@@ -3,17 +3,60 @@
     {
       "id": "oil",
       "name": "Oil",
-      "icon": "oil-well"
+      "icon": "oil-well",
+      "items": [
+        { "id": "fine", "name": "Fine light" },
+        { "id": "premium", "name": "Premium light" },
+        { "id": "light", "name": "Light" },
+        { "id": "medium", "name": "Medium" },
+        { "id": "bitumen", "name": "Bitumen" },
+        { "id": "naphtha", "name": "Naphtha" }
+      ]
     },
     {
       "id": "gas",
       "name": "Gas",
-      "icon": "oil-temperature"
+      "icon": "oil-temperature",
+      "items": [
+        { "id": "methane", "name": "Methane" },
+        { "id": "ethane", "name": "Ethane" },
+        { "id": "ethane_plus", "name": "Etane Plus" },
+        { "id": "propane", "name": "Propane" },
+        { "id": "butane", "name": "Butane" },
+        { "id": "pentane", "name": "Pentane" }
+      ]
     },
     {
       "id": "water",
       "name": "Water",
-      "icon": "water-arrow-down"
+      "icon": "water-arrow-down",
+      "items": [
+        { "id": "alkaline", "name": "Alkaline" },
+        { "id": "brine", "name": "Brine" },
+        { "id": "salt", "name": "Salt" },
+        { "id": "brakish", "name": "Brakish" },
+        { "id": "fresh", "name": "Fresh" },
+        { "id": "combination", "name": "combination" }
+      ]
+    },
+    {
+      "id": "steam",
+      "name": "Steam",
+      "icon": "face-nose-steam"
+    },
+    {
+      "id": "nonhydro",
+      "name": "Non-hydrocarbon Gas",
+      "icon": "sensor cloud",
+      "items": [
+        { "id": "alir", "name": "Air" },
+        { "id": "carbon", "name": "Carbon" },
+        { "id": "dioxide", "name": "Dioxide" },
+        { "id": "hs", "name": "Hydrogen Sulfide" },
+        { "id": "helium", "name": "Helium" },
+        { "id": "hydrogen", "name": "Hydrogen" },
+        { "id": "nitrogen", "name": "Nitrogen" }
+      ]
     }
   ],
   "ActiveState": [
@@ -30,22 +73,46 @@
       "name": "Inactive"
     }
   ],
+  "Status": [
+    {
+      "id": "on",
+      "icon": "person-running-fast",
+      "name": "Active"
+    },
+    {
+      "id": "idle",
+      "icon": "gauge-circle-minus",
+      "name": "Idle"
+    },
+    {
+      "id": "shut",
+      "icon": "lock",
+      "name": "Shut-in"
+    },
+    {
+      "id": "abandoned",
+      "icon": "house-person-leave",
+      "name": "Abandoned"
+    }
+  ],
   "Jurisdiction": [
     {
-      "id": "ca.ab",
-      "name": "Canada / Alberta"
+      "id": "ca",
+      "name": "Canada",
+      "items": [
+        { "id": "ca.ab", "name": "Alberta" },
+        { "id": "ca.sk", "name": "Saskatchewan" },
+        { "id": "ca.bc", "name": "British Columbia" },
+        { "id": "ca.on", "name": "Ontario" }
+      ]
     },
     {
-      "id": "ca.sk",
-      "name": "Canada / Saskatchewan"
-    },
-    {
-      "id": "ca.bc",
-      "name": "Canada / Brit. Columbia"
-    },
-    {
-      "id": "ca.on",
-      "name": "Canada / Ontario"
+      "id": "us",
+      "name": "USA",
+      "items": [
+        { "id": "us.mo", "name": "Montana" },
+        { "id": "us.nd", "name": "North Dakjota" }
+      ]
     }
   ],
   "Trajectory": [
@@ -104,6 +171,238 @@
     {
       "id": "crown",
       "name": "Crown"
+    }
+  ],
+  "LaheeClass": [
+    {
+      "id": "wildcat",
+      "name": "Wildcat well"
+    },
+    {
+      "id": "outpost",
+      "name": "Outpost"
+    },
+    {
+      "id": "appraisal",
+      "name": "Appraisal"
+    },
+    {
+      "id": "dev",
+      "name": "Development"
+    },
+    {
+      "id": "reentry",
+      "name": "Re-entry"
+    },
+    {
+      "id": "test",
+      "name": "Test hole"
+    },
+    {
+      "id": "experiment",
+      "name": "Experimantal"
+    },
+    {
+      "id": "other",
+      "name": "Other"
+    }
+  ],
+  "Confidentiality": [
+    {
+      "id": "conf",
+      "name": "Private"
+    },
+    {
+      "id": "non_conf",
+      "name": "Non-confidential"
+    },
+    {
+      "id": "conf_below",
+      "name": "Confidential below"
+    }
+  ],
+  "BusinessInterest": [
+    {
+      "id": "operated",
+      "name": "Financial – Operated"
+    },
+    {
+      "id": "non_operated",
+      "name": "Financial - Non-operated"
+    },
+    {
+      "id": "obligatory",
+      "name": "Obligatory"
+    },
+    {
+      "id": "technical",
+      "name": "Technical"
+    },
+    {
+      "id": "no",
+      "name": "No Business Interest"
+    }
+  ],
+  "BusinessIntention": [
+    {
+      "id": "explore",
+      "name": "Explore"
+    },
+    {
+      "id": "appraise",
+      "name": "Appraise"
+    },
+    {
+      "id": "extend",
+      "name": "Extend"
+    },
+    {
+      "id": "dev",
+      "name": "Development"
+    }
+  ],
+  "Role": [
+    {
+      "id": "single",
+      "name": "Inject product - Single"
+    },
+    {
+      "id": "multi",
+      "name": "Inject Products - Multiple"
+    },
+    {
+      "id": "simultanious",
+      "name": "Produce/Inject - Simultanious"
+    },
+    {
+      "id": "cyclic",
+      "name": "Produce/Inject - Cyclic"
+    },
+    {
+      "id": "supply",
+      "name": "Service - Supply"
+    },
+    {
+      "id": "storage",
+      "name": "Service - Storage"
+    },
+    {
+      "id": "relief",
+      "name": "Service - Relief"
+    },
+    {
+      "id": "observation",
+      "name": "Service - Observation"
+    },
+    {
+      "id": "research",
+      "name": "Research"
+    }
+  ],
+  "Outcome": [
+    {
+      "id": "achieved",
+      "name": "achieved"
+    },
+    {
+      "id": "unachived",
+      "name": "Unachived"
+    },
+    {
+      "id": "undetrmined",
+      "name": "Undetrmined"
+    }
+  ],
+  "PlayType": [
+    {
+      "id": "conventional",
+      "name": "Conventional"
+    },
+    {
+      "id": "shale",
+      "name": "Shale"
+    },
+    {
+      "id": "sand",
+      "name": "Oil sands"
+    },
+    {
+      "id": "methane",
+      "name": "Coalbed Methane"
+    },
+    {
+      "id": "hydrate",
+      "name": "Gas Hydrate"
+    },
+    {
+      "id": "tight",
+      "name": "Tight Sand"
+    },
+    {
+      "id": "subsalt",
+      "name": "Sub-salt"
+    },
+    {
+      "id": "non_hydro",
+      "name": "Non-hydrocarbon"
+    },
+    {
+      "id": "carbon",
+      "name": "Carbon Capture and Storage"
+    }
+  ],
+  "WellStructure": [
+    {
+      "id": "simple",
+      "name": "Simple"
+    },
+    {
+      "id": "simplex",
+      "name": "Simplex"
+    },
+    {
+      "id": "compound",
+      "name": "Compound"
+    },
+    {
+      "id": "complex",
+      "name": "Complex"
+    },
+    {
+      "id": "network",
+      "name": "Netwokr"
+    }
+  ],
+  "FluidDirection": [
+    {
+      "id": "inflow",
+      "name": "Inflow"
+    },
+    {
+      "id": "outflow",
+      "name": "Outflow"
+    },
+    {
+      "id": "static",
+      "name": "Static"
+    },
+    {
+      "id": "cyclic",
+      "name": "Cyclic"
+    }
+  ],
+  "DeviationReason": [
+    {
+      "id": "deviation",
+      "name": "Deviation"
+    },
+    {
+      "id": "sidetrack",
+      "name": "Sidetrack Fish"
+    },
+    {
+      "id": "horizontal",
+      "name": "Horizontal"
     }
   ],
   "Lithology": [
