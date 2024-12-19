@@ -27,7 +27,8 @@ async function test() {
     well = schema.well,
     result: any = await db.query.well.findFirst({
       where: eq(well.id, id),
-      with: { wellbores: true, projects: true, stakeHolders : {with: {company: true}}, operator: true},
+      with: { wellbores: true, projects: true, stakeHolders: { with: { company: {columns: { name: true }}
+}}, operator: true},
     });
   console.log("testing", result);
   console.log(result.stakeHolders.map((e: any) => e.company))
