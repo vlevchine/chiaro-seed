@@ -1,0 +1,63 @@
+Components: tree, multi-select, nested select
+select with null-option="none" selects first item - default select behavior
+
+Well page:
+    new well has default wellbore
+Project page:
+    owner may delegate project 1)engineering, 2)auditor; 
+    preset lookups - like mud inventory, BHA, etc.
+Admin: - always editable
+    Lookups: 
+        type - select; 
+        filters: name, depricated
+        table - name, code, depricated (chb), pending (color - warn);
+    Vendors: same as above - by type
+    Hierarchy: - tree
+        each node: > name: desc - text inputs grow by size
+        hover over node: delete, add sibling, add child
+    Users: host users only, i.e with no affiliation
+        filters: name
+        layout: user table on left, groups on right
+        table: name, roles(m-s), email, approval rate
+        groups: cards expandable, name, users in details,
+        drag user to group
+    Cooperation: companies (partner, engineering, owner, auditor)
+        list: name, selects - locale, timezone, datum; chb - partner, engineering, owner, auditor
+            when expanded - table: users - same as for host users
+        alternatively - companies table on left, users table on right
+
+add lookups
+Datum
+- name: "Ground Level"
+  id: ground
+- name: "Kelly Bushing"
+  id: kb
+- name: "Tubing Hanger Flange"
+  id: thf
+- name: "Casing flange"
+  id: cf
+
+Locale
+- name: "English (USA)"
+  id: en-us
+- name: "English (Canada)"
+  id: en-ca
+
+Timezone
+- name: "Eastern Standard Time (EST)"
+  id: "America/Toronto"
+- name: "Central Standard Time (CST)"
+  id: "America/Chicago"
+- name: "Mountain Standard Time (MST)"
+  id: "America/Edmonton"
+- name: "Pacific Standard Time (PST)"
+  id: "America/Vancouver"
+    
+LookupType
+- id: bit
+  name: Bits
+- id: mud
+  name: Muds
+- id: c_size
+  name: "Casing sizes"
+    

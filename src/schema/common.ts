@@ -12,23 +12,33 @@ export const company: any = sqliteTable("companies", {
   name: text("name"),
   locale: text("locale"), //.notNull(),
   timezone: text("timezone"),
+  datum: text("datum"), //Lookup: kb, ground
   ogc: integer("ogc", { mode: "boolean" }),
   engineering: integer("engineering", { mode: "boolean" }),
-  type: text("type"), //"engineering" | "partner" | "auditor"
+  partner: integer("partner", { mode: "boolean" }),
   auditor: integer("auditor", { mode: "boolean" }),
   createdAt: integer("created_at", { mode: "timestamp" }).default(
     sql`(unixepoch())`
   ),
+  depricated: integer("depricated", { mode: "timestamp" }),
 });
 
 export const vendor: any = sqliteTable("vendors", {
   id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  code: text("code"),
+  type: text("type"), //multiple types joined - 'muds;bits;'
+  pending: integer("pending", { mode: "boolean" }),
+  depricated: integer("depricated", { mode: "timestamp" }),
+});
+
+export const lookup: any = sqliteTable("lookups", {
+  id: text("id").primaryKey(),
   name: text("name"),
+  code: text("code"),
   type: text("type"),
-  muds: integer("muds", { mode: "boolean" }),
-  createdAt: integer("created_at", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  pending: integer("pending", { mode: "boolean" }),
+  depricated: integer("depricated", { mode: "timestamp" }),
 });
 
 export const user: any = sqliteTable("users", {
@@ -48,6 +58,12 @@ export const user: any = sqliteTable("users", {
   deactivated: integer("deactivated_at", { mode: "timestamp" }),
 });
 
+export const userGroup: any = sqliteTable("user-groups", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+});
+
 export const well = sqliteTable("wells", {
   id: text("id").primaryKey(),
   name: text("name").notNull(), //.unique(),
@@ -55,42 +71,107 @@ export const well = sqliteTable("wells", {
   uwi: text("uwi"),
   type: text("type").notNull(),
   status: text("status"),
-  //general location depths
+  ////user groups
+  //general
   subType: text("subtype"),
   hierarchy: text("hierarchy"),
   spudDate: integer("spud_date", { mode: "timestamp" }),
-  jurisdiction: text("jurisdiction"),
-  ownerId: text("owner_id").references(() => company.id),
-  operatorId: text("operator_id").references(() => company.id),
   h2s: integer("h2s", { mode: "boolean" }),
   wellStructure: text("well_structure"),
   fluidDirection: text("fluid_direction"),
+  role: text("role"),
+  playType: text("play_type"),
 
-  //business
+  //legal
+  jurisdiction: text("jurisdiction"),
+  ownerId: text("owner_id").references(() => company.id),
+  operatorId: text("operator_id").references(() => company.id),
   license: text("license"), //.unique(),
-  licenseType: text("license_type"),
+  leaseType: text("lease_type"),
   landOwner: text("land_owner"),
   confidentiality: text("confidentiality"),
+
+  //business
   class: text("lahee_class"),
   businessInterest: text("business_interest"),
   businessIntention: text("business_intention"),
   outcome: text("outcome"),
-  role: text("role"),
-  playType: text("play_type"),
+  /////partners
 
-  //location and reference points
+  //location
   surface: text("surface"),
   utm: text("utm", { mode: "json" }).$type<Bounds>(),
   lat: real("lat"),
   lon: real("lon"),
   directions: text("directions"),
   siteAccess: text("site_access"),
+  //elevations
   ground: real("ground"),
   kb: real("kb"),
   cf: real("cf"),
   thf: real("thf"),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
 });
 
+export const wellbore: any = sqliteTable("wellbores", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  uwi: text("uwi"),
+  wellId: text("well_id")
+    .notNull()
+    .references(() => well.id, { onDelete: "cascade" }),
+  parentId: text("parent_id").references(() => wellbore.id, {
+    onDelete: "cascade",
+  }),
+  trajectory: text("trajectory"),
+  reason: text("reason"),
+  //estimated depths
+  kopTVD: real("kop_tvd"),
+  kopMD: real("kop_md"),
+  tvd: real("tvd"),
+  md: real("md"),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
+
+export const project = sqliteTable("projects", {
+  id: text("id").primaryKey(),
+  type: text("name").notNull(),
+  estStart: integer("est_start", { mode: "timestamp" }),
+  estEnd: integer("est_end", { mode: "timestamp" }),
+  start: integer("start", { mode: "timestamp" }), //text("start").default(sql`(CURRENT_DATE)`),
+  end: integer("end", { mode: "timestamp" }),
+  wellId: text("well_id")
+    .notNull()
+    .references(() => well.id, { onDelete: "cascade" }),
+  aboveEstWarning: real("above_est_warn"),
+  //Estimates: list of - day, depth, cost
+  createdBy: text("created_by")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
+
+//Join tables
+export const userToUserGroup: any = sqliteTable(
+  "user-to-groups",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id),
+    groupId: text("group_id")
+      .notNull()
+      .references(() => userGroup.id),
+  },
+  (t: any) => ({
+    pk: primaryKey({ columns: [t.userId, t.groupId] }),
+  })
+);
 export const companyToWell = sqliteTable(
   "companies_to_wells",
   {
@@ -107,48 +188,20 @@ export const companyToWell = sqliteTable(
   })
 );
 
-export const wellbore: any = sqliteTable("wellbores", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  uwi: text("uwi"),
-  wellId: text("well_id")
-    .notNull()
-    .references(() => well.id, { onDelete: "cascade" }),
-  parentId: text("parent_id").references(() => wellbore.id, {
-    onDelete: "cascade",
-  }),
-  trajectory: text("trajectory"),
-  reason: text("reason"),
-  kopTVD: real("kop_tvd"),
-  kopMD: real("kop_md"),
-  tvd: real("tvd"),
-  md: real("md"),
-});
-
-export const project = sqliteTable(
-  "projects",
+export const wellToUserGroup: any = sqliteTable(
+  "well-to-groups",
   {
-    id: text("id").primaryKey(),
-    type: text("name").notNull(),
-    start: integer("start", { mode: "timestamp" }), //text("start").default(sql`(CURRENT_DATE)`),
-    end: integer("end", { mode: "timestamp" }),
-    createdBy: text("created_by")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
     wellId: text("well_id")
       .notNull()
-      .references(() => well.id, { onDelete: "cascade" }),
-  }
-  // (table) => ({
-  //   startIndex: index("start_index").on(table.start),
-  //   endIndex: index("end_index").on(table.end),
-  //   timeUniqueConstraint: unique("time_unique_constraint").on(
-  //     table.start,
-  //     table.createdBy
-  //   ),
-  // })
+      .references(() => well.id),
+    groupId: text("group_id")
+      .notNull()
+      .references(() => userGroup.id),
+  },
+  (t: any) => ({
+    pk: primaryKey({ columns: [t.wellId, t.groupId] }),
+  })
 );
-
 export const projectToWellbore = sqliteTable(
   "projects_to_wellbores",
   {
@@ -163,20 +216,38 @@ export const projectToWellbore = sqliteTable(
     pk: primaryKey({ columns: [t.projectId, t.wellboreId] }),
   })
 );
+export const projectToUser = sqliteTable(
+  "projects_to_users",
+  {
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id),
+    userId: text("manager_id")
+      .notNull()
+      .references(() => user.id),
+    role: text("role"), //'manager', 'fieldManager'
+  },
+  (t: any) => ({
+    pk: primaryKey({ columns: [t.projectId, t.userId] }),
+  })
+);
 
 //Relations
-export const companyRelations = relations(company, ({ one, many }) => ({
-  ownWells: many(well, { relationName: "owner" }),
-  operatedWells: many(well, { relationName: "operator" }),
-  //servicWells: many(well),
-  partners: many(companyToWell),
-}));
-
-export const userRelations = relations(user, ({ one }) => ({
+export const userRelations = relations(user, ({ one, many }) => ({
   affiliation: one(company, {
     fields: [user.affiliationId],
     references: [company.id],
   }),
+  groups: many(userToUserGroup),
+  projects: many(projectToUser),
+}));
+export const userGroupRelations = relations(userGroup, ({ many }) => ({
+  users: many(userToUserGroup),
+}));
+export const companyRelations = relations(company, ({ many }) => ({
+  ownWells: many(well, { relationName: "owner" }),
+  operatedWells: many(well, { relationName: "operator" }),
+  stakeInWells: many(companyToWell),
 }));
 
 export const wellRelations = relations(well, ({ one, many }) => ({
@@ -192,8 +263,9 @@ export const wellRelations = relations(well, ({ one, many }) => ({
   }),
   wellbores: many(wellbore),
   projects: many(project),
-  stakeHolders: many(companyToWell),
+  partners: many(companyToWell),
 }));
+
 export const wellboreRelations = relations(wellbore, ({ one, many }) => ({
   well: one(well, {
     fields: [wellbore.wellId],
@@ -206,7 +278,7 @@ export const wellboreRelations = relations(wellbore, ({ one, many }) => ({
   }),
   childBores: many(wellbore, { relationName: "wellbores" }),
 }));
-export const projectRelations = relations(project, ({ one }) => ({
+export const projectRelations = relations(project, ({ one, many }) => ({
   createdBy: one(user, {
     fields: [project.createdBy],
     references: [user.id],
@@ -215,6 +287,7 @@ export const projectRelations = relations(project, ({ one }) => ({
     fields: [project.wellId],
     references: [well.id],
   }),
+  users: many(projectToUser),
 }));
 
 export const companyToWellRelations = relations(companyToWell, ({ one }) => ({
@@ -225,6 +298,17 @@ export const companyToWellRelations = relations(companyToWell, ({ one }) => ({
   well: one(well, {
     fields: [companyToWell.wellId],
     references: [well.id],
+  }),
+}));
+
+export const projectToUserRelations = relations(projectToUser, ({ one }) => ({
+  project: one(project, {
+    fields: [projectToUser.projectId],
+    references: [project.id],
+  }),
+  user: one(user, {
+    fields: [projectToUser.userId],
+    references: [user.id],
   }),
 }));
 

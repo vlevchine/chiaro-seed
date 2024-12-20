@@ -2,14 +2,14 @@ import { eq } from "drizzle-orm";
 import fs from "fs";
 import { getConnection } from "./db_client";
 import { generateSessionToken, getIdFromToken } from "./helpers";
-import { generate, getTenants, init, testSession } from "./mock";
+import { generate, getTenants, init, testSession, initMocks } from "./mock";
 import * as northern from "./schema/northern";
 import * as registry from "./schema/registry";
 import * as western from "./schema/western";
 
 let comp = "northern";
-const co: string = ''; 
-//const co: string = "northern"; 
+const co: string = "";
+//const co: string = "northern";
 //const co: string = "registry";
 
 const clientSchemas: any = { registry, northern, western },
@@ -18,23 +18,28 @@ if (co === "registry") {
   seedRegistry(["northern", "western", "eastern", "southern"]);
 } else if (co) {
   seedClient();
-} else test()
+} else test();
 
 async function test() {
-  const id = "jcjB_9dJVF";
+  const id = "RaKeJd69v1";
   const db: any = await getConnection(comp),
     schema = clientSchemas[comp],
     well = schema.well,
     result: any = await db.query.well.findFirst({
-      where: eq(well.id, id),
-      with: { wellbores: true, projects: true, stakeHolders: { with: { company: {columns: { name: true }}
-}}, operator: true},
+      // where: eq(well.id, id),
+      with: {
+        wellbores: true,
+        projects: true,
+        stakeHolders: { with: { company: { columns: { name: true } } } },
+        operator: true,
+      },
     });
   console.log("testing", result);
-  console.log(result.stakeHolders.map((e: any) => e.company))
+  console.log(result.stakeHolders.map((e: any) => e.company));
 }
 //process.env.TEST_VALUE
 async function seedClient(): Promise<void> {
+  await initMocks();
   let t0 = Date.now();
   const items: any[] = [
       { tblPrimary: "company" },
@@ -75,6 +80,7 @@ async function seedClient(): Promise<void> {
   console.log(`finished: ${Date.now() - t0}ms`);
 }
 async function seedRegistry(ids: string[]): Promise<void> {
+  await initMocks();
   const db: any = await getConnection(co),
     tenantId = ids[0],
     tenant_db: any = await getConnection(tenantId),
@@ -101,7 +107,7 @@ async function testTokens() {
 }
 
 async function writeTable(db: any, tbl: any, values: any[]) {
-  const chunk = 1000,
+  const chunk = 500,
     length = Math.ceil(values.length / chunk),
     arr = Array.from({ length }).map((e, i) => i);
   for await (const ind of arr) {

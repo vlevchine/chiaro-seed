@@ -1,7 +1,14 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
+//import { nanoid } from "https://cdn.jsdelivr.net/npm/nanoid/nanoid.js";
 import { hashPassword } from "./helpers";
 import { getOperators } from "drizzle-orm";
+
+//let nanoid: any;
+export const initMocks = async () => {
+  // const module = await import("nanoid");
+  // nanoid = module.nanoid;
+};
 
 const specialRoles = ["power", "partner", "audit"],
   roleSets = [
@@ -40,7 +47,6 @@ export async function getVendors(num = 0) {
     }))
   );
 }
-
 
 export async function getUsers(num = 0) {
   const items = [
@@ -113,10 +119,12 @@ function fakeUser() {
 }
 
 const meridians = ["W4", "W5", "W6"],
- partners = ["partner1", "partner2"];;
+  partners = ["partner1", "partner2"];
 export async function getWells(num = 0) {
   const _partners: any[] = [],
-    names = Array.from(new Set(Array.from({ length: num * 2}).map(() => faker.location.city()))),
+    names = Array.from(
+      new Set(Array.from({ length: num * 2 }).map(() => faker.location.city()))
+    ),
     wells = Array.from({ length: num }).map((_e, i) => {
       const w = from(meridians),
         rg = faker.number.int({ min: 1, max: 30 }),
@@ -138,7 +146,7 @@ export async function getWells(num = 0) {
           alias: faker.lorem.word(),
           type: wellType.id,
           jurisdiction: from(from(conf.Jurisdiction).items).id,
-          hierarchy: getHierarchy(),
+          hierarchy: from(from(hier).items).id,
           ownerId: getOwner(),
           operatorId: getOperator(),
           status: from(conf.Status).id,
@@ -174,7 +182,7 @@ export async function getWells(num = 0) {
           },
           spudDate,
         };
-      if (Math.random() > 0.5)
+      if (Math.random() > 0.05)
         Array.from({ length: faker.number.int({ min: 1, max: 2 }) }).forEach(
           (e, i) => {
             _partners.push({
@@ -191,21 +199,20 @@ export async function getWells(num = 0) {
   return [wells, _partners];
 }
 
-
 export async function getWellbores(num = 0, cache: any) {
   const wells: any[] = cache.well,
     bores: any[] = wells.map((well: any) => {
       const w_uwi = well.uwi.split("/");
       const tvd = faker.number.float({
-            min: 800,
-            max: 1440,
-            fractionDigits: 2,
-      }),
+          min: 800,
+          max: 1440,
+          fractionDigits: 2,
+        }),
         kopTVD = faker.number.float({
-            min: 50,
-            max: 140,
-            fractionDigits: 2,
-      });
+          min: 50,
+          max: 140,
+          fractionDigits: 2,
+        });
       return Array.from({
         length: faker.number.int({ min: 1, max: 4 }),
       }).map((_e, i) => {
@@ -215,7 +222,7 @@ export async function getWellbores(num = 0, cache: any) {
           id,
           name: ["Whole", es].join("-"),
           wellId: well.id,
-          parentId: i === 1 ? well.id + '_00'  : undefined,
+          parentId: i ? well.id + "_00" : undefined,
           uwi: [w_uwi[0], w_uwi[1], es].join("/"),
           tvd,
           md: tvd + faker.number.int({ min: 0, max: 50 }),
@@ -270,30 +277,31 @@ async function getProjects(n = 0, cache: any) {
     _proj_bores: any[] = [];
 
   const projects = wells.map((w, i) => {
-    let spud = w.spudDate,
-      num = faker.number.int({ min: 0, max: projSets.length - 1 }),
-      set = projSets[num],
-      year = spud.getFullYear(),
-      month = spud.getMonth(),
-      day = spud.getDate();
+      let spud = w.spudDate,
+        num = faker.number.int({ min: 0, max: projSets.length - 1 }),
+        set = projSets[num],
+        year = spud.getFullYear(),
+        month = spud.getMonth(),
+        day = spud.getDate();
 
-    return set.map((e: any) => {
-      const type = projectTypes[e],
-        [months]: [number] = timed[type],
-        start = new Date(year, month + months, day, 12),
-        end = faker.date.soon({ days: 90, refDate: start }),
-        proj = {
-          id: nanoid(10),
-          wellId: w.id,
-          type,
-          start,
-          end,
-          createdBy: from(users).id,
-        };
-        if (type === 'drilling') _proj_bores.push({wellboreId: w.id + '_00', projectId: proj.id})
-      return proj;
-    });
-  }, []),
+      return set.map((e: any) => {
+        const type = projectTypes[e],
+          [months]: [number] = timed[type],
+          start = new Date(year, month + months, day, 12),
+          end = faker.date.soon({ days: 90, refDate: start }),
+          proj = {
+            id: nanoid(10),
+            wellId: w.id,
+            type,
+            start,
+            end,
+            createdBy: from(users).id,
+          };
+        if (type === "drilling")
+          _proj_bores.push({ wellboreId: w.id + "_00", projectId: proj.id });
+        return proj;
+      });
+    }, []),
     _projects = projects.flat();
 
   return [_projects, _proj_bores];
@@ -344,84 +352,80 @@ export function testSession(tenant: any, user: any) {
   };
 }
 
-
-  const hier = [
-    {
-      id: "tier1",
-      name: "Tiier 1",
-      items: [
-        { id: "Group 1", name: "tier1.group1" },
-        { id: "Group 2", name: "tier1.group2" },
-        { id: "Group 3", name: "tier1.group3" },
-      ],
-    },
-    {
-      id: "tier2",
-      name: "Tiier 2",
-      items: [
-        { id: "Group 1", name: "tier2.group1" },
-        { id: "Group 2", name: "tier2.group2" },
-        { id: "Group 3", name: "tier2.group3" },
-        { id: "Group 4", name: "tier2.group4" },
-      ],
-    },
+const hier = [
+  {
+    id: "tier1",
+    name: "Tiier 1",
+    items: [
+      { name: "Group 1", id: "tier1.group1" },
+      { name: "Group 2", id: "tier1.group2" },
+      { name: "Group 3", id: "tier1.group3" },
+    ],
+  },
+  {
+    id: "tier2",
+    name: "Tiier 2",
+    items: [
+      { name: "Group 1", id: "tier2.group1" },
+      { name: "Group 2", id: "tier2.group2" },
+      { name: "Group 3", id: "tier2.group3" },
+      { name: "Group 4", id: "tier2.group4" },
+    ],
+  },
 ];
-function getHierarchy() {
-  const top: any = hier[faker.number.int({ min: 0, max: 1})]
-  return top[faker.number.int({ min: 0, max: 2 })]
-}
+
 const companies = [
-  {
-    id: "eng_serv",
-    name: "Engineering Service Co.",
-    engineering: true,
-    locale: "en-CA",
-    timezone: "America/Winnipeg",
-  },
-  {
-    id: "eng_united",
-    name: "United Engineering Corp.",
-    engineering: true,
-    locale: "en-US",
-    timezone: "America/Winnipeg",
-  },
-  {
-    id: "global",
-    name: "Global Oil and Gas Corp.",
-    engineering: true,
-    ogc: true,
-    locale: "en-US",
-    timezone: "America/Winnipeg",
-  },
-  {
-    partner: true,
-    id: "partner1",
-    name: "Financial Hub Inc.",
-    locale: "en-US",
-    timezone: "America/Toronto",
-  },
-  {
-    partner: true,
-    id: "partner2",
-    name: "Venture Club Inc.",
-    locale: "en-US",
-    timezone: "America/Toronto",
-  },
-  {
-    type: "auditor",
-    id: "auditor",
-    name: "Auditing Authrity Co.",
-    locale: "en-GB",
-    timezone: "Europe/London",
-  },
-],
-  eng = ['eng_united', 'eng_serv', 'global'];
+    {
+      id: "eng_serv",
+      name: "Engineering Service Co.",
+      engineering: true,
+      locale: "en-CA",
+      timezone: "America/Winnipeg",
+    },
+    {
+      id: "eng_united",
+      name: "United Engineering Corp.",
+      engineering: true,
+      locale: "en-US",
+      timezone: "America/Winnipeg",
+    },
+    {
+      id: "global",
+      name: "Global Oil and Gas Corp.",
+      engineering: true,
+      ogc: true,
+      locale: "en-US",
+      timezone: "America/Winnipeg",
+    },
+    {
+      partner: true,
+      id: "partner1",
+      name: "Financial Hub Inc.",
+      locale: "en-US",
+      timezone: "America/Toronto",
+    },
+    {
+      partner: true,
+      id: "partner2",
+      name: "Venture Club Inc.",
+      locale: "en-US",
+      timezone: "America/Toronto",
+    },
+    {
+      type: "auditor",
+      id: "auditor",
+      name: "Auditing Authrity Co.",
+      locale: "en-GB",
+      timezone: "Europe/London",
+    },
+  ],
+  eng = ["eng_united", "eng_serv", "global"];
 
 export async function getCompanies() {
-  return companies
+  return companies;
 }
 function getOperator() {
-  return Math.random() > 0.5 ? from(eng) : undefined
+  return Math.random() > 0.5 ? from(eng) : undefined;
 }
 function getOwner() {
   return;

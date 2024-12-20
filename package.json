@@ -24,12 +24,12 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
-    "-": "^0.0.1",
     "@node-rs/argon2": "^2.0.0",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
     "@oslojs/jwt": "^0.3.0",
     "better-sqlite3": "^11.5.0",
-    "drizzle-orm": "^0.36.3"
+    "drizzle-orm": "^0.36.3",
+    "nanoid": "^5.0.9"
   }
 }
