@@ -37,19 +37,34 @@ export const generate: any = {
     lLookups = _lLookups;
   };
 
+function generateNames(num: number, func: any) {
+  return Array.from(new Set(Array.from({ length: num * 2 }).map(func)));
+}
+
 export async function getVendors(num = 0) {
-  return Promise.resolve(
-    Array.from({ length: num }).map(() => ({
+  const options = ["bit;", "mud;", "bit;mud;"],
+    names: any[] = generateNames(num, faker.company.name),
+    items = Array.from({ length: num }).map((_e, i: number) => ({
       id: nanoid(10),
-      name: faker.company.name(),
-      type: "muds",
-      muds: true,
-    }))
-  );
+      name: names[i],
+      type: from(options),
+      code: true,
+      deactivated:
+        Math.random() < 0.1
+          ? faker.date.between({ from: "2022-01-01", to: "2024-01-01" })
+          : undefined,
+    }));
+  return [items];
 }
 
 export async function getUsers(num = 0) {
-  const items = [
+  const groups: any[] = [
+      { id: "north", name: "North" },
+      { id: "center", name: "Center" },
+      { id: "south", name: "South" },
+    ],
+    userToGroups: any[] = [],
+    fixed = [
       {
         id: "winston",
         name: "Winston Chirchill",
@@ -81,8 +96,14 @@ export async function getUsers(num = 0) {
         roles: "power",
         approvalLevel: 100000000,
       },
-      ...Array.from({ length: num }).map((e: any, i: number) => fakeUser()),
     ],
+    gen = Array.from({ length: num }).map((e: any, i: number) => {
+      const usr = fakeUser(),
+        groupId = from(groups).id;
+      userToGroups.push({ groupId, userId: usr.id });
+      return usr;
+    }),
+    items = [...fixed, ...gen],
     psw = await Promise.all(
       Array.from({ length: items.length }).map((e: any) => hashPassword("4321"))
     );
@@ -90,7 +111,7 @@ export async function getUsers(num = 0) {
     e.password = psw[i];
   });
 
-  return items;
+  return [items, groups, userToGroups];
 }
 
 function fakeUser() {
@@ -120,8 +141,10 @@ function fakeUser() {
 
 const meridians = ["W4", "W5", "W6"],
   partners = ["partner1", "partner2"];
-export async function getWells(num = 0) {
+export async function getWells(num = 0, cache: any = {}) {
   const _partners: any[] = [],
+    _userGroups: any[] = [],
+    { userGroup } = cache,
     names = Array.from(
       new Set(Array.from({ length: num * 2 }).map(() => faker.location.city()))
     ),
@@ -182,7 +205,7 @@ export async function getWells(num = 0) {
           },
           spudDate,
         };
-      if (Math.random() > 0.05)
+      if (Math.random() > 0.05) {
         Array.from({ length: faker.number.int({ min: 1, max: 2 }) }).forEach(
           (e, i) => {
             _partners.push({
@@ -192,11 +215,13 @@ export async function getWells(num = 0) {
             });
           }
         );
+        _userGroups.push({ wellId: well.id, groupId: from(userGroup).id });
+      }
 
       return well;
     });
 
-  return [wells, _partners];
+  return [wells, _partners, _userGroups];
 }
 
 export async function getWellbores(num = 0, cache: any) {
@@ -380,6 +405,7 @@ const companies = [
       name: "Engineering Service Co.",
       engineering: true,
       locale: "en-CA",
+      datum: "kb",
       timezone: "America/Winnipeg",
     },
     {
@@ -387,6 +413,7 @@ const companies = [
       name: "United Engineering Corp.",
       engineering: true,
       locale: "en-US",
+      datum: "kb",
       timezone: "America/Winnipeg",
     },
     {
@@ -395,6 +422,7 @@ const companies = [
       engineering: true,
       ogc: true,
       locale: "en-US",
+      datum: "kb",
       timezone: "America/Winnipeg",
     },
     {
@@ -402,6 +430,7 @@ const companies = [
       id: "partner1",
       name: "Financial Hub Inc.",
       locale: "en-US",
+      datum: "ground",
       timezone: "America/Toronto",
     },
     {
@@ -409,20 +438,22 @@ const companies = [
       id: "partner2",
       name: "Venture Club Inc.",
       locale: "en-US",
+      datum: "ground",
       timezone: "America/Toronto",
     },
     {
-      type: "auditor",
+      auditor: true,
       id: "auditor",
       name: "Auditing Authrity Co.",
       locale: "en-GB",
+      datum: "ground",
       timezone: "Europe/London",
     },
   ],
   eng = ["eng_united", "eng_serv", "global"];
 
 export async function getCompanies() {
-  return companies;
+  return [companies];
 }
 function getOperator() {
   return Math.random() > 0.5 ? from(eng) : undefined;

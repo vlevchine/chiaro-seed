@@ -9,7 +9,8 @@
     "intro": "drizzle-kit introspect",
     "seedd": "node --env-file=.env --watch -r ts-node/register src/index.ts",
     "seed": "node --env-file=.env -r ts-node/register src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "reg": "node --env-file=.env -r ts-node/register src/registry.ts",
+    "test": "node --env-file=.env -r ts-node/register src/test.ts"
   },
   "keywords": [],
   "author": "",

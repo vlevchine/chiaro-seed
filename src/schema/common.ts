@@ -20,7 +20,7 @@ export const company: any = sqliteTable("companies", {
   createdAt: integer("created_at", { mode: "timestamp" }).default(
     sql`(unixepoch())`
   ),
-  depricated: integer("depricated", { mode: "timestamp" }),
+  deactivated: integer("deactivated_at", { mode: "timestamp" }),
 });
 
 export const vendor: any = sqliteTable("vendors", {
@@ -29,7 +29,7 @@ export const vendor: any = sqliteTable("vendors", {
   code: text("code"),
   type: text("type"), //multiple types joined - 'muds;bits;'
   pending: integer("pending", { mode: "boolean" }),
-  depricated: integer("depricated", { mode: "timestamp" }),
+  deactivated: integer("deactivated_at", { mode: "timestamp" }),
 });
 
 export const lookup: any = sqliteTable("lookups", {
@@ -38,7 +38,7 @@ export const lookup: any = sqliteTable("lookups", {
   code: text("code"),
   type: text("type"),
   pending: integer("pending", { mode: "boolean" }),
-  depricated: integer("depricated", { mode: "timestamp" }),
+  deactivated: integer("deactivated_at", { mode: "timestamp" }),
 });
 
 export const user: any = sqliteTable("users", {
@@ -62,6 +62,10 @@ export const userGroup: any = sqliteTable("user-groups", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
+    sql`(unixepoch() * 1000)`
+  ),
+  deactivated: integer("deactivated_at", { mode: "timestamp" }),
 });
 
 export const well = sqliteTable("wells", {
@@ -187,7 +191,6 @@ export const companyToWell = sqliteTable(
     pk: primaryKey({ columns: [t.companyId, t.wellId] }),
   })
 );
-
 export const wellToUserGroup: any = sqliteTable(
   "well-to-groups",
   {
@@ -232,6 +235,67 @@ export const projectToUser = sqliteTable(
   })
 );
 
+//Join relations
+export const userToUserGroupRelations = relations(
+  userToUserGroup,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [userToUserGroup.userId],
+      references: [user.id],
+    }),
+    group: one(userGroup, {
+      fields: [userToUserGroup.groupId],
+      references: [userGroup.id],
+    }),
+  })
+);
+export const companyToWellRelations = relations(companyToWell, ({ one }) => ({
+  company: one(company, {
+    fields: [companyToWell.companyId],
+    references: [company.id],
+  }),
+  well: one(well, {
+    fields: [companyToWell.wellId],
+    references: [well.id],
+  }),
+}));
+export const wellToUserGroupRelations = relations(
+  wellToUserGroup,
+  ({ one }) => ({
+    well: one(well, {
+      fields: [wellToUserGroup.wellId],
+      references: [well.id],
+    }),
+    group: one(userGroup, {
+      fields: [wellToUserGroup.groupId],
+      references: [userGroup.id],
+    }),
+  })
+);
+export const projectToWellboreRelations = relations(
+  projectToWellbore,
+  ({ one }) => ({
+    project: one(project, {
+      fields: [projectToWellbore.projectId],
+      references: [project.id],
+    }),
+    user: one(wellbore, {
+      fields: [projectToWellbore.wellboreId],
+      references: [wellbore.id],
+    }),
+  })
+);
+export const projectToUserRelations = relations(projectToUser, ({ one }) => ({
+  company: one(project, {
+    fields: [projectToUser.projectId],
+    references: [company.id],
+  }),
+  well: one(user, {
+    fields: [projectToUser.userId],
+    references: [user.id],
+  }),
+}));
+
 //Relations
 export const userRelations = relations(user, ({ one, many }) => ({
   affiliation: one(company, {
@@ -243,6 +307,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
 }));
 export const userGroupRelations = relations(userGroup, ({ many }) => ({
   users: many(userToUserGroup),
+  wells: many(wellToUserGroup),
 }));
 export const companyRelations = relations(company, ({ many }) => ({
   ownWells: many(well, { relationName: "owner" }),
@@ -277,6 +342,7 @@ export const wellboreRelations = relations(wellbore, ({ one, many }) => ({
     relationName: "wellbores",
   }),
   childBores: many(wellbore, { relationName: "wellbores" }),
+  projects: many(projectToWellbore),
 }));
 export const projectRelations = relations(project, ({ one, many }) => ({
   createdBy: one(user, {
@@ -288,28 +354,7 @@ export const projectRelations = relations(project, ({ one, many }) => ({
     references: [well.id],
   }),
   users: many(projectToUser),
-}));
-
-export const companyToWellRelations = relations(companyToWell, ({ one }) => ({
-  company: one(company, {
-    fields: [companyToWell.companyId],
-    references: [company.id],
-  }),
-  well: one(well, {
-    fields: [companyToWell.wellId],
-    references: [well.id],
-  }),
-}));
-
-export const projectToUserRelations = relations(projectToUser, ({ one }) => ({
-  project: one(project, {
-    fields: [projectToUser.projectId],
-    references: [project.id],
-  }),
-  user: one(user, {
-    fields: [projectToUser.userId],
-    references: [user.id],
-  }),
+  wellbores: many(projectToWellbore),
 }));
 
 //Types

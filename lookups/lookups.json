@@ -423,6 +423,27 @@
       "name": "Claystone"
     }
   ],
+  "Datum": [
+    { "name": "Ground Level", "id": "ground" },
+    { "name": "Kelly Bushing", "id": "kb" },
+    { "name": "Tubing Hanger Flange", "id": "thf" },
+    { "name": "Casing flange", "id": "cf" }
+  ],
+  "Locale": [
+    { "name": "English (Canada)", "id": "en-CA" },
+    { "name": "English (USA)", "id": "en-US" }
+  ],
+  "TimeZone": [
+    { "name": "Eastern Standard Time (EST)", "id": "America/Toronto" },
+    { "name": "Central Standard Time (CST)", "id": "America/Winnipeg" },
+    { "name": "Mountain Standard Time (MST)", "id": "America/Edmonton" },
+    { "name": "Pacific Standard Time (PST)", "id": "America/Vancouver" }
+  ],
+  "ProductType": [
+    { "name": "Bits", "id": "bit" },
+    { "name": "Muds", "id": "mud" }
+  ],
+  "LookupType": [{ "name": "Casing sizes", "id": "c_size" }],
   "Project": [
     {
       "id": "afe",

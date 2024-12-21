@@ -47,7 +47,7 @@ Timezone
 - name: "Eastern Standard Time (EST)"
   id: "America/Toronto"
 - name: "Central Standard Time (CST)"
-  id: "America/Chicago"
+  id: "America/Winnipeg"
 - name: "Mountain Standard Time (MST)"
   id: "America/Edmonton"
 - name: "Pacific Standard Time (PST)"
