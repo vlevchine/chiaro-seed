@@ -62,8 +62,13 @@ export async function getUsers(num = 0) {
       { id: "north", name: "North" },
       { id: "center", name: "Center" },
       { id: "south", name: "South" },
+      { id: "west", name: "West" },
     ],
-    userToGroups: any[] = [],
+    userToGroups: any[] = [
+      { userId: "winston", groupId: "west" },
+      { userId: "george", groupId: "west" },
+      { userId: "jimmy", groupId: "west" },
+    ],
     fixed = [
       {
         id: "winston",
@@ -71,6 +76,20 @@ export async function getUsers(num = 0) {
         username: "winston.chirchill",
         email: `winston.chirchill@${co}.io`,
         roles: "wellMng,activity",
+      },
+      {
+        id: "george",
+        name: "George Bush",
+        username: "george.bush",
+        email: `george.bush@${co}.io`,
+        roles: "wellMng,field",
+      },
+      {
+        id: "jimmy",
+        name: "Jimmy carter",
+        username: "jimmy.carter",
+        email: `jimmy.carter@${co}.io`,
+        roles: "field",
       },
       {
         id: "woodrow",
@@ -215,7 +234,10 @@ export async function getWells(num = 0, cache: any = {}) {
             });
           }
         );
-        _userGroups.push({ wellId: well.id, groupId: from(userGroup).id });
+        _userGroups.push(
+          { wellId: well.id, groupId: "west" },
+          { wellId: well.id, groupId: from(userGroup).id }
+        );
       }
 
       return well;
@@ -328,6 +350,10 @@ async function getProjects(n = 0, cache: any) {
           };
         if (type === "drilling")
           _proj_bores.push({ wellboreId: w.id + "_00", projectId: proj.id });
+        _proj_users.push(
+          { projectId: proj.id, userId: "jimmy", role: "field" },
+          { projectId: proj.id, userId: "george", role: "WwllMng" }
+        );
         return proj;
       });
     }, []),
