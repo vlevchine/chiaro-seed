@@ -259,7 +259,7 @@ export async function getWellbores(num = 0, cache: any) {
       });
     });
 
-  return bores.flat();
+  return [bores.flat()];
 }
 
 const projSets = [
@@ -299,7 +299,8 @@ async function getProjects(n = 0, cache: any) {
         allow = roles.includes("wellMng") || roles.includes("power");
       return allow;
     }),
-    _proj_bores: any[] = [];
+    _proj_bores: any[] = [],
+    _proj_users: any[] = [];
 
   const projects = wells.map((w, i) => {
       let spud = w.spudDate,
@@ -320,6 +321,9 @@ async function getProjects(n = 0, cache: any) {
             type,
             start,
             end,
+            estStart: faker.date.recent({ days: 5, refDate: start }),
+            estEnd: faker.date.recent({ days: 10, refDate: end }),
+            aboveEstWarning: 1.1,
             createdBy: from(users).id,
           };
         if (type === "drilling")
@@ -329,7 +333,7 @@ async function getProjects(n = 0, cache: any) {
     }, []),
     _projects = projects.flat();
 
-  return [_projects, _proj_bores];
+  return [_projects, _proj_bores, _proj_users];
 }
 
 export function getTenants(ids: string[]) {
