@@ -286,11 +286,11 @@ export const projectToWellboreRelations = relations(
   })
 );
 export const projectToUserRelations = relations(projectToUser, ({ one }) => ({
-  company: one(project, {
+  project: one(project, {
     fields: [projectToUser.projectId],
-    references: [company.id],
+    references: [project.id],
   }),
-  well: one(user, {
+  user: one(user, {
     fields: [projectToUser.userId],
     references: [user.id],
   }),
@@ -345,7 +345,7 @@ export const wellboreRelations = relations(wellbore, ({ one, many }) => ({
   projects: many(projectToWellbore),
 }));
 export const projectRelations = relations(project, ({ one, many }) => ({
-  createdBy: one(user, {
+  created: one(user, {
     fields: [project.createdBy],
     references: [user.id],
   }),
@@ -353,7 +353,7 @@ export const projectRelations = relations(project, ({ one, many }) => ({
     fields: [project.wellId],
     references: [well.id],
   }),
-  users: many(projectToUser),
+  players: many(projectToUser),
   wellbores: many(projectToWellbore),
 }));
 
@@ -376,44 +376,3 @@ type Formation = {
   lithology: string;
 };
 
-// well0 = sqliteTable("wells", {
-//     id: text("id").primaryKey(),
-//     name: text("name"), //.unique(),
-//     alias: text("alias"), //.unique(),
-//     type: text("type").notNull(),
-//     active: integer("active", { mode: "boolean" }),
-//     uwi: text("uwi"),
-//     license: text("license"), //.unique(),
-//     licensee: text("licensee"),
-//     licenseType: text("license_type"),
-//     landOwner: text("land_owner"),
-//     jurisdiction: text("jurisdiction"),
-//     trajectory: text("trajectory"),
-//     area: text("area"),
-//     field: text("field"),
-//     surveyType: text("survey_type"),
-//     siteAccess: text("site_access"),
-//     geo: text("geo", { mode: "json" }).$type<Geo>(),
-//     surface: text("surface"),
-//     ground: real("ground"),
-//     bounds: text("bounds", { mode: "json" }).$type<Bounds>(),
-//     kb: real("kb"),
-//     h2s: real("h2s"),
-//     spudDate: integer("spud_date", { mode: "timestamp" }),
-//     tvd: real("tvd"),
-//     md: real("md"),
-//     formations: text("formations", { mode: "json" }).$type<Formation[]>(),
-//     directions: text("directions"),
-//   }),
-//   wellBore0 = sqliteTable("wellbores", {
-//     id: text("id").primaryKey(),
-//     wellId: text("well_id")
-//       .notNull()
-//       .references(() => well.id, { onDelete: "cascade" }),
-//     name: text("name").notNull(),
-//     uwi: text("uwi"),
-//     trajectory: text("trajectory"),
-//     location: text("location"),
-//     depth: real("depth"),
-//     active: integer("active", { mode: "boolean" }),
-//   });

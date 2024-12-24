@@ -2,7 +2,6 @@ import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
 //import { nanoid } from "https://cdn.jsdelivr.net/npm/nanoid/nanoid.js";
 import { hashPassword } from "./helpers";
-import { getOperators } from "drizzle-orm";
 
 //let nanoid: any;
 export const initMocks = async () => {
@@ -13,11 +12,11 @@ export const initMocks = async () => {
 const specialRoles = ["power", "partner", "audit"],
   roleSets = [
     "admin",
-    "admin,office",
-    "office,activity",
-    "activity,field",
-    "office,activity,field",
-    "field",
+    "admin,manager",
+    "manager,approver",
+    "approver",
+    "activity",
+    "activity,manager",
   ],
   from: (arr: any[]) => any = (arr: any[]) =>
     faker.helpers.arrayElement(arr as any);
@@ -25,6 +24,7 @@ const specialRoles = ["power", "partner", "audit"],
 let co: string, conf: any, lLookups: any;
 export const generate: any = {
     vendor: getVendors,
+    lookup: getLookups,
     company: getCompanies,
     user: getUsers,
     well: getWells,
@@ -48,7 +48,6 @@ export async function getVendors(num = 0) {
       id: nanoid(10),
       name: names[i],
       type: from(options),
-      code: true,
       deactivated:
         Math.random() < 0.1
           ? faker.date.between({ from: "2022-01-01", to: "2024-01-01" })
@@ -56,14 +55,32 @@ export async function getVendors(num = 0) {
     }));
   return [items];
 }
+export async function getLookups(num = 0) {
+  const options = ["bit", "mud"],
+    names = ["Bit #", "Mud #"],
+    items = options
+      .map((type: string, j: number) =>
+        Array.from({ length: num }).map((_e, i: number) => ({
+          id: nanoid(10),
+          name: names[j] + (i + 1),
+          type,
+          deactivated:
+            Math.random() < 0.1
+              ? faker.date.between({ from: "2022-01-01", to: "2024-01-01" })
+              : undefined,
+        }))
+      )
+      .flat();
+  return [items];
+}
 
+const presetGroups: any[] = [
+  { id: "north", name: "North" },
+  { id: "center", name: "Center" },
+  { id: "south", name: "South" },
+];
 export async function getUsers(num = 0) {
-  const groups: any[] = [
-      { id: "north", name: "North" },
-      { id: "center", name: "Center" },
-      { id: "south", name: "South" },
-      { id: "west", name: "West" },
-    ],
+  const groups = [{ id: "west", name: "West" }, ...presetGroups],
     userToGroups: any[] = [
       { userId: "winston", groupId: "west" },
       { userId: "george", groupId: "west" },
@@ -75,28 +92,28 @@ export async function getUsers(num = 0) {
         name: "Winston Chirchill",
         username: "winston.chirchill",
         email: `winston.chirchill@${co}.io`,
-        roles: "wellMng,activity",
+        roles: "admin,manager,activity",
       },
       {
         id: "george",
         name: "George Bush",
         username: "george.bush",
         email: `george.bush@${co}.io`,
-        roles: "wellMng,field",
+        roles: "manager,activity",
       },
       {
         id: "jimmy",
         name: "Jimmy carter",
         username: "jimmy.carter",
         email: `jimmy.carter@${co}.io`,
-        roles: "field",
+        roles: "activity",
       },
       {
         id: "woodrow",
         name: "Woodrow Wilson",
         username: "woodrow.wilson",
         email: `woodrow.wilson@${co}.io`,
-        roles: "engineering",
+        roles: "manager,activity",
         affiliationId: "eng_united",
       },
       {
@@ -118,7 +135,7 @@ export async function getUsers(num = 0) {
     ],
     gen = Array.from({ length: num }).map((e: any, i: number) => {
       const usr = fakeUser(),
-        groupId = from(groups).id;
+        groupId = from(presetGroups).id;
       userToGroups.push({ groupId, userId: usr.id });
       return usr;
     }),
@@ -236,7 +253,7 @@ export async function getWells(num = 0, cache: any = {}) {
         );
         _userGroups.push(
           { wellId: well.id, groupId: "west" },
-          { wellId: well.id, groupId: from(userGroup).id }
+          { wellId: well.id, groupId: from(presetGroups).id }
         );
       }
 
@@ -352,7 +369,7 @@ async function getProjects(n = 0, cache: any) {
           _proj_bores.push({ wellboreId: w.id + "_00", projectId: proj.id });
         _proj_users.push(
           { projectId: proj.id, userId: "jimmy", role: "field" },
-          { projectId: proj.id, userId: "george", role: "WwllMng" }
+          { projectId: proj.id, userId: "george", role: "office" }
         );
         return proj;
       });

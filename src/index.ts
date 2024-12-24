@@ -1,13 +1,13 @@
-import { eq } from "drizzle-orm";
 import fs from "fs";
 import { getConnection } from "./db_client";
 import { generateSessionToken, getIdFromToken } from "./helpers";
-import { generate, getTenants, init, testSession, initMocks } from "./mock";
+import { generate, init, initMocks } from "./mock";
 import * as northern from "./schema/northern";
 import * as registry from "./schema/registry";
 import * as western from "./schema/western";
 
-let co = "northern";
+let co = "northern",
+  skip = false; //true false
 const clientSchemas: any = { registry, northern, western },
   schema: any = clientSchemas[co];
 seedClient();
@@ -19,6 +19,7 @@ async function seedClient(): Promise<void> {
   const items: any[] = [
       { tblPrimary: "company" },
       { tblPrimary: "vendor", size: 300 },
+      { tblPrimary: "lookup", size: 500 },
       {
         tblPrimary: "user",
         size: 32,
@@ -51,15 +52,15 @@ async function seedClient(): Promise<void> {
     );
     cached[tblPrimary] = values;
     console.log("writing to:", tblPrimary, values.length);
-    //  await writeTable(db, schema[tblPrimary], values);
+    if (!skip) await writeTable(db, schema[tblPrimary], values);
     if (tblSecondary) {
       cached[tblSecondary] = secondary;
       console.log("also writing to:", tblSecondary, secondary?.length);
-      //   await writeTable(db, schema[tblSecondary], secondary);
+      if (!skip) await writeTable(db, schema[tblSecondary], secondary);
     }
     if (tblJoin) {
       console.log("also writing joins to:", tblJoin, joins?.length);
-      //   await writeTable(db, schema[tblJoin], joins);
+      if (!skip) await writeTable(db, schema[tblJoin], joins);
     }
     const result = await db.select().from(schema[tblPrimary]);
     console.log("finished writing to:", tblPrimary, result?.length);
